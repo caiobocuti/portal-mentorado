@@ -452,6 +452,13 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); opacity: 1
   padding: 12px 14px; border-radius: 0 8px 8px 0;
   margin-bottom: 16px; font-size: 13px; color: var(--text);
 }
+.sync-status {
+  padding: 11px 14px; border-radius: 8px; margin-bottom: 14px;
+  font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+}
+.sync-status.sync-loading { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+.sync-status.sync-ok { background: var(--green-soft); color: var(--green); border: 1px solid var(--green); }
+.sync-status.sync-err { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
 .output-card .md-block {
   background: var(--surface-alt); border: 1px solid var(--border);
   border-radius: 8px; padding: 18px;
@@ -742,8 +749,10 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); opacity: 1
     <span class="green-tag">Pronto para envio</span>
     <h2 id="outputTitle">Update Mensal · —</h2>
 
+    <div id="syncStatus" class="sync-status sync-loading">Enviando seu update para o painel do mentor...</div>
+
     <div class="instructions">
-      <strong>O que fazer agora:</strong> Clique em "Copiar texto", envie por WhatsApp ou email para o seu mentor. Ele atualiza o painel mestre com base no seu update.
+      <strong>O que fazer agora:</strong> Seu update já foi enviado ao painel do mentor automaticamente. Se quiser, clique em "Copiar texto" e mande também por WhatsApp como aviso.
     </div>
 
     <div class="md-block" id="mdOutput"></div>
@@ -756,6 +765,37 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); opacity: 1
 </div>
 
 <script>
+// ============ SUPABASE (painel do mentor ao vivo) ============
+// Chave pública (anon). Só permite GRAVAR updates. Ninguém consegue LER os dados pela chave.
+const SUPABASE_URL = "https://ywamkvmlspmposatzyhp.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3YW1rdm1sc3BtcG9zYXR6eWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNTg4MzAsImV4cCI6MjA5NDkzNDgzMH0.T0OS8sxEdsdSr4oiAg881FKO90CfY2-cIvl5ibQGPHQ";
+
+async function sendToSupabase() {
+  const data = collectData();
+  const refMes = getReferenceMonth();
+  const payload = {
+    mentee_code: currentMentee.code,
+    mentee_name: currentMentee.nome,
+    mes_ref: refMes,
+    data: data
+  };
+  const r = await fetch(SUPABASE_URL + "/rest/v1/submissions", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) {
+    const t = await r.text();
+    throw new Error("HTTP " + r.status + " " + t);
+  }
+  return true;
+}
+
 // ============ MENTORADOS + TAREFAS PRÉ-CARREGADAS ============
 const MENTORADOS = {
   "ADVERSE-K9PT": {
@@ -1529,13 +1569,27 @@ function generateMarkdown() {
   return md;
 }
 
-document.getElementById("generateBtn").addEventListener("click", () => {
+document.getElementById("generateBtn").addEventListener("click", async () => {
+  saveDraft();
   const md = generateMarkdown();
   document.getElementById("outputTitle").textContent = `Update Mensal · ${currentMentee.nome} · ${mesLabelFromKey(getReferenceMonth())}`;
   document.getElementById("mdOutput").textContent = md;
   formScreen.classList.add("hidden");
   outputScreen.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const st = document.getElementById("syncStatus");
+  st.className = "sync-status sync-loading";
+  st.textContent = "Enviando seu update para o painel do mentor...";
+  try {
+    await sendToSupabase();
+    st.className = "sync-status sync-ok";
+    st.textContent = "✓ Update recebido pelo painel do mentor.";
+  } catch (err) {
+    st.className = "sync-status sync-err";
+    st.textContent = "⚠ Não consegui enviar automaticamente. Copie o texto abaixo e mande ao seu mentor por WhatsApp.";
+    console.error("Supabase send failed:", err);
+  }
 });
 
 document.getElementById("copyBtn").addEventListener("click", async () => {

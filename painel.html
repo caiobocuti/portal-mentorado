@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel do Mentor · Publi Advisor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0B0B0C; --surface:#161617; --surface-alt:#1E1E20;
+  --border:#2B2B2E; --border-strong:#3C3C40;
+  --text:#F4F4F5; --text-muted:#A1A1AA; --text-faint:#71717A;
+  --accent:#FF1E3D; --accent-soft:#2B0D12; --ink:#FF1E3D;
+  --green:#4ADE80; --green-soft:#12251A;
+  --amber:#FBBF24; --amber-soft:#2A220A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Cairo",-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Helvetica,Arial,sans-serif;
+  background:radial-gradient(1200px 600px at 80% -10%, #19090c 0%, transparent 60%), var(--bg);
+  color:var(--text); min-height:100vh; line-height:1.5; letter-spacing:.01em;
+}
+input{color:var(--text);font-family:inherit}
+input::placeholder{color:var(--text-faint);opacity:1}
+.hidden{display:none!important}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
+
+/* ===== LOGIN ===== */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:36px 32px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.5)
+}
+.brand{font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--accent);font-weight:700;margin-bottom:8px}
+.login-card h1{font-size:24px;font-weight:900;margin-bottom:4px}
+.login-card .sub{color:var(--text-muted);font-size:13.5px;margin-bottom:24px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);font-weight:600;margin-bottom:6px}
+.field input{
+  width:100%;padding:12px 14px;background:var(--surface-alt);
+  border:1px solid var(--border-strong);border-radius:8px;font-size:15px
+}
+.field input:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:var(--ink)}
+.btn-main{
+  width:100%;padding:13px;margin-top:6px;background:var(--ink);color:#fff;border:none;
+  border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit
+}
+.btn-main:hover{filter:brightness(1.08)}
+.btn-main:disabled{opacity:.5;cursor:default}
+.login-err{background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent);
+  padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px}
+.login-card .hint{margin-top:16px;font-size:12px;color:var(--text-muted);text-align:center;line-height:1.6}
+
+/* ===== HEADER ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.topbar h1{font-size:22px;font-weight:900}
+.topbar .brand{margin-bottom:2px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.btn-ghost{background:transparent;border:1px solid var(--border-strong);color:var(--text-muted);
+  padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600}
+.btn-ghost:hover{border-color:var(--accent);color:var(--text)}
+
+/* ===== SUMMARY STRIP ===== */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.sum-card .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);font-weight:600;margin-bottom:6px}
+.sum-card .v{font-size:26px;font-weight:900;line-height:1}
+.sum-card .v small{font-size:14px;font-weight:600;color:var(--text-muted)}
+.sum-card .v.accent{color:var(--accent)}
+.sum-card .v.green{color:var(--green)}
+
+/* ===== MENTEE GRID ===== */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;
+  cursor:pointer;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card.empty{cursor:default;opacity:.62}
+.card.empty:hover{border-color:var(--border);transform:none}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}
+.card-top .nome{font-size:17px;font-weight:800}
+.card-top .meta{font-size:12px;color:var(--text-muted);margin-top:2px}
+.pill{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:4px 9px;border-radius:20px;white-space:nowrap}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.old{background:var(--amber-soft);color:var(--amber)}
+.pill.none{background:var(--surface-alt);color:var(--text-faint);border:1px solid var(--border)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.kpi .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-weight:600}
+.kpi .val{font-size:18px;font-weight:800;margin-top:2px}
+.kpi .val.sm{font-size:14px;font-weight:700}
+.kpi .val.green{color:var(--green)}
+.kpi .val.accent{color:var(--accent)}
+.kpi .val.amber{color:var(--amber)}
+.card-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.taskbar{flex:1;height:7px;background:var(--surface-alt);border-radius:6px;overflow:hidden}
+.taskbar > span{display:block;height:100%;background:var(--green)}
+.card-foot .tasklbl{font-size:11.5px;color:var(--text-muted);white-space:nowrap}
+.alert-flag{margin-top:12px;font-size:12px;color:var(--amber);background:var(--amber-soft);
+  border-left:3px solid var(--amber);padding:8px 10px;border-radius:0 6px 6px 0}
+.empty-msg{font-size:13px;color:var(--text-faint);padding:18px 0 4px}
+
+/* ===== MODAL ===== */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(3px);
+  z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto}
+.modal{background:var(--surface);border:1px solid var(--border-strong);border-radius:16px;
+  width:100%;max-width:760px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.modal-hdr h2{font-size:23px;font-weight:900}
+.modal-hdr .sub{font-size:13px;color:var(--text-muted);margin-top:2px}
+.x{background:transparent;border:1px solid var(--border-strong);color:var(--text-muted);
+  width:34px;height:34px;border-radius:8px;font-size:18px;cursor:pointer;line-height:1;flex-shrink:0}
+.x:hover{border-color:var(--accent);color:var(--text)}
+.sect{margin-top:22px}
+.sect h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);
+  font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mbox{background:var(--surface-alt);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.mbox .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-weight:600}
+.mbox .n{font-size:18px;font-weight:800;margin-top:3px}
+.mbox .n.green{color:var(--green)} .mbox .n.accent{color:var(--accent)} .mbox .n.amber{color:var(--amber)}
+.chart-wrap{background:var(--surface-alt);border:1px solid var(--border);border-radius:10px;padding:14px;height:240px}
+table.hist{width:100%;border-collapse:collapse;font-size:13px}
+table.hist th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--text-faint);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--border)}
+table.hist td{padding:8px;border-bottom:1px solid var(--border)}
+.tlist{display:flex;flex-direction:column;gap:8px}
+.titem{background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+  display:flex;align-items:flex-start;gap:10px}
+.tstatus{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:3px 8px;border-radius:5px;white-space:nowrap;margin-top:1px}
+.ts-feito{background:var(--green-soft);color:var(--green)}
+.ts-em_andamento{background:#0d1f2b;color:#5cc8ff}
+.ts-atrasado{background:var(--accent-soft);color:var(--accent)}
+.ts-nao_comecou{background:var(--surface);color:var(--text-faint);border:1px solid var(--border)}
+.ts-cancelado{background:var(--surface);color:var(--text-faint);text-decoration:line-through}
+.titem .tdesc{font-size:13px;flex:1}
+.titem .tprio{font-size:10px;font-weight:700;color:var(--accent)}
+.muda{font-size:13px;line-height:1.6}
+.muda b{color:var(--text)}
+.muda .row{margin-bottom:8px;padding:10px 12px;background:var(--surface-alt);border-radius:8px;border:1px solid var(--border)}
+.muda .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);font-weight:700;display:block;margin-bottom:3px}
+.dim{color:var(--text-faint)}
+.loading{text-align:center;padding:60px 0;color:var(--text-muted);font-size:14px}
+@media(max-width:760px){.summary{grid-template-columns:1fr 1fr}.mgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.summary{grid-template-columns:1fr 1fr}.mgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <div class="brand">Mentoria · Publi Advisor</div>
+    <h1>Painel do Mentor</h1>
+    <div class="sub">Acesso restrito. Veja os updates de todos os mentorados ao vivo.</div>
+    <div id="loginErr" class="login-err hidden"></div>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="email" value="caiobocuti@catalunyafilmes.com" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="password" placeholder="Sua senha do Supabase" autocomplete="current-password">
+    </div>
+    <button class="btn-main" id="loginBtn">Entrar</button>
+    <div class="hint">Use o e-mail e a senha do usuário que você criou no Supabase (Authentication). Se ainda não criou, veja o guia do mentor.</div>
+  </div>
+</div>
+
+<!-- ========== DASHBOARD ========== -->
+<div id="dashScreen" class="wrap hidden">
+  <div class="topbar">
+    <div>
+      <div class="brand">Mentoria · Publi Advisor</div>
+      <h1>Painel do Mentor</h1>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-ghost" id="refreshBtn">↻ Atualizar</button>
+      <button class="btn-ghost" id="logoutBtn">Sair</button>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+  <div id="dashBody"><div class="loading">Carregando updates...</div></div>
+</div>
+
+<!-- ========== MODAL ========== -->
+<div id="modalBg" class="modal-bg hidden">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const SUPABASE_URL = "https://ywamkvmlspmposatzyhp.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3YW1rdm1sc3BtcG9zYXR6eWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNTg4MzAsImV4cCI6MjA5NDkzNDgzMH0.T0OS8sxEdsdSr4oiAg881FKO90CfY2-cIvl5ibQGPHQ";
+const SESSION_KEY = "mentor-session";
+
+// Roster completo — para mostrar quem ainda NÃO mandou update
+const ROSTER = [
+  { code:"ADVERSE-K9PT",   nome:"Adverse",          quem:"Djeison & Robert" },
+  { code:"ARCO-M3LJ",      nome:"Arco Filmes",      quem:"João Lucas & Jonatan" },
+  { code:"BRAVA-X7QN",     nome:"Brava Filmes",     quem:"Matheus" },
+  { code:"DUNAS-R5VW",     nome:"Dunas Filmes",     quem:"Felipe" },
+  { code:"F3-B2HD",        nome:"F3 Imagens",       quem:"Tiago" },
+  { code:"POLIVERSO-T8FY", nome:"Poliverso Filmes", quem:"Bruno & Felipe" },
+  { code:"PROVOKE-J4ZC",   nome:"Provoke",          quem:"Piai, Vinhas & Victor" },
+  { code:"TRUCO-N6KS",     nome:"Truco Films",      quem:"Isabela & Luiz" }
+];
+
+const MESES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+
+// ===== HELPERS =====
+function fmtBRL(v){ if(v===""||v==null) return "—"; const n=parseFloat(v); if(isNaN(n)) return "—";
+  if(Math.abs(n)>=1000) return "R$ "+(n/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})+"k";
+  return "R$ "+n.toLocaleString("pt-BR",{maximumFractionDigits:0}); }
+function fmtBRLfull(v){ if(v===""||v==null) return "—"; const n=parseFloat(v); if(isNaN(n)) return "—";
+  return "R$ "+n.toLocaleString("pt-BR",{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function fmtPct(v){ if(v===""||v==null||v==="") return "—"; const n=parseFloat(v); if(isNaN(n)) return "—"; return n+"%"; }
+function mesLabel(k){ if(!k) return "—"; const [y,m]=k.split("-"); const i=parseInt(m,10)-1; return (MESES[i]||"?")+"/"+y; }
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+function timeAgo(iso){ if(!iso) return "—"; const d=new Date(iso); const diff=(Date.now()-d.getTime())/1000;
+  if(diff<60) return "agora"; if(diff<3600) return Math.floor(diff/60)+" min atrás";
+  if(diff<86400) return Math.floor(diff/3600)+"h atrás"; const days=Math.floor(diff/86400);
+  if(days===1) return "ontem"; if(days<30) return days+" dias atrás";
+  return d.toLocaleDateString("pt-BR"); }
+
+// ===== AUTH =====
+function getSession(){ try{ return JSON.parse(localStorage.getItem(SESSION_KEY)||"null"); }catch(e){ return null; } }
+function setSession(s){ localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+
+async function login(email, password){
+  const r = await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password", {
+    method:"POST",
+    headers:{ "apikey":SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const j = await r.json();
+  if(!r.ok){ throw new Error(j.error_description || j.msg || j.error || ("Falha no login ("+r.status+")")); }
+  const sess = { access_token:j.access_token, refresh_token:j.refresh_token,
+    expires_at: Date.now() + (j.expires_in||3600)*1000, email };
+  setSession(sess);
+  return sess;
+}
+async function refreshSession(){
+  const s = getSession(); if(!s||!s.refresh_token) return null;
+  const r = await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=refresh_token", {
+    method:"POST",
+    headers:{ "apikey":SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+    body: JSON.stringify({ refresh_token:s.refresh_token })
+  });
+  if(!r.ok){ clearSession(); return null; }
+  const j = await r.json();
+  const sess = { access_token:j.access_token, refresh_token:j.refresh_token,
+    expires_at: Date.now()+(j.expires_in||3600)*1000, email:s.email };
+  setSession(sess); return sess;
+}
+async function validToken(){
+  let s = getSession(); if(!s) return null;
+  if(Date.now() > s.expires_at - 60000){ s = await refreshSession(); }
+  return s;
+}
+
+// ===== DATA =====
+async function fetchSubmissions(){
+  let s = await validToken();
+  if(!s) throw new Error("Sessão expirada");
+  const r = await fetch(SUPABASE_URL+"/rest/v1/submissions?select=*&order=created_at.desc", {
+    headers:{ "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer "+s.access_token }
+  });
+  if(r.status===401){ const ns=await refreshSession(); if(!ns) throw new Error("Sessão expirada");
+    return fetchSubmissions(); }
+  if(!r.ok){ throw new Error("Erro ao buscar dados ("+r.status+")"); }
+  return r.json();
+}
+
+// agrupa por mentee_code; pega submissão mais recente como atual; junta financeiroMeses de todas
+function groupByMentee(rows){
+  const map = {};
+  rows.forEach(row=>{
+    if(!row.mentee_code) return;
+    if(String(row.mentee_code).toUpperCase().startsWith("TESTE")) return;
+    const code = row.mentee_code;
+    if(!map[code]) map[code] = { code, nome:row.mentee_name, submissions:[], finMerged:{} };
+    map[code].submissions.push(row);
+  });
+  Object.values(map).forEach(g=>{
+    g.submissions.sort((a,b)=> new Date(b.created_at)-new Date(a.created_at));
+    g.latest = g.submissions[0];
+    // merge histórico financeiro (submissões mais antigas primeiro, recentes sobrescrevem)
+    [...g.submissions].reverse().forEach(sub=>{
+      const fm = (sub.data&&sub.data.financeiroMeses)||{};
+      Object.keys(fm).forEach(k=>{ g.finMerged[k] = fm[k]; });
+    });
+  });
+  return map;
+}
+
+function currentFin(g){
+  const d = g.latest.data||{};
+  const ref = g.latest.mes_ref;
+  const fm = g.finMerged||{};
+  if(ref && fm[ref] && (fm[ref].faturamento)) return { mes:ref, ...fm[ref] };
+  // fallback: último mês com faturamento
+  const meses = Object.keys(fm).filter(k=> fm[k] && parseFloat(fm[k].faturamento)>0).sort();
+  if(meses.length){ const k=meses[meses.length-1]; return { mes:k, ...fm[k] }; }
+  return { mes:ref };
+}
+function taskStats(g){
+  const t = (g.latest.data&&g.latest.data.tarefas)||[];
+  const total=t.length; const feito=t.filter(x=>x.status==="feito").length;
+  const atrasado=t.filter(x=>x.status==="atrasado").length;
+  return { total, feito, atrasado, pct: total? Math.round(feito/total*100):0 };
+}
+function ocupacao(g){
+  const h=(g.latest.data&&g.latest.data.horas)||{};
+  if(h.total&&h.faturaveis&&parseFloat(h.total)>0) return Math.round(parseFloat(h.faturaveis)/parseFloat(h.total)*100);
+  return null;
+}
+
+// ===== RENDER =====
+let STATE = {};
+
+function renderDashboard(map){
+  STATE = map;
+  const codes = Object.keys(map);
+  const now = new Date();
+  const curRef = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+  const prevD = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const prevRef = prevD.getFullYear()+"-"+String(prevD.getMonth()+1).padStart(2,"0");
+
+  // summary
+  const comUpdate = codes.length;
+  let updatesMes = 0, somaFat = 0, lastTime = null;
+  codes.forEach(c=>{
+    const g=map[c];
+    const r=g.latest.mes_ref;
+    if(r===curRef||r===prevRef) updatesMes++;
+    const f=currentFin(g); if(f.faturamento) somaFat+=parseFloat(f.faturamento)||0;
+    const t=new Date(g.latest.created_at); if(!lastTime||t>lastTime) lastTime=t;
+  });
+  document.getElementById("summary").innerHTML = `
+    <div class="sum-card"><div class="k">Mentorados c/ update</div><div class="v">${comUpdate}<small>/${ROSTER.length}</small></div></div>
+    <div class="sum-card"><div class="k">Updates recentes</div><div class="v ${updatesMes?'green':''}">${updatesMes}</div></div>
+    <div class="sum-card"><div class="k">Faturamento somado*</div><div class="v accent">${fmtBRL(somaFat)}</div></div>
+    <div class="sum-card"><div class="k">Último update</div><div class="v" style="font-size:18px">${lastTime?timeAgo(lastTime.toISOString()):'—'}</div></div>`;
+
+  // cards — roster order; mentees sem update aparecem como "empty"
+  let html = '<div class="grid">';
+  ROSTER.forEach(rmem=>{
+    const g = map[rmem.code];
+    if(!g){
+      html += `<div class="card empty">
+        <div class="card-top"><div><div class="nome">${esc(rmem.nome)}</div><div class="meta">${esc(rmem.quem)}</div></div>
+        <span class="pill none">Sem update</span></div>
+        <div class="empty-msg">Ainda não enviou nenhum update pelo portal.</div></div>`;
+      return;
+    }
+    const fin = currentFin(g);
+    const ts = taskStats(g);
+    const occ = ocupacao(g);
+    const com = (g.latest.data&&g.latest.data.comercial)||{};
+    const mud = (g.latest.data&&g.latest.data.mudancas)||{};
+    const r = g.latest.mes_ref;
+    const recent = (r===curRef||r===prevRef);
+    const pill = recent? `<span class="pill ok">${esc(mesLabel(r))}</span>` : `<span class="pill old">${esc(mesLabel(r))}</span>`;
+    const alerta = mud.gargalo ? `<div class="alert-flag">⚠ Gargalo novo: ${esc(mud.gargalo).slice(0,90)}</div>`
+                 : (mud.saidas ? `<div class="alert-flag">⚠ Saída no time: ${esc(mud.saidas).slice(0,80)}</div>` : "");
+    html += `<div class="card" data-code="${esc(g.code)}">
+      <div class="card-top">
+        <div><div class="nome">${esc(g.nome||rmem.nome)}</div><div class="meta">${esc(rmem.quem)} · ${timeAgo(g.latest.created_at)}</div></div>
+        ${pill}
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl">Faturamento</div><div class="val accent">${fmtBRL(fin.faturamento)}</div></div>
+        <div class="kpi"><div class="lbl">Margem</div><div class="val ${parseFloat(fin.margem)>=15?'green':(fin.margem?'amber':'')}">${fmtPct(fin.margem)}</div></div>
+        <div class="kpi"><div class="lbl">Ocupação</div><div class="val sm ${occ!=null&&occ>=60?'green':(occ!=null?'amber':'')}">${occ!=null?occ+'%':'—'}</div></div>
+        <div class="kpi"><div class="lbl">Prop. fechadas</div><div class="val sm">${com.fechados||'—'}${com.valorFechado?' · '+fmtBRL(com.valorFechado):''}</div></div>
+      </div>
+      ${alerta}
+      <div class="card-foot">
+        <div class="taskbar"><span style="width:${ts.pct}%"></span></div>
+        <div class="tasklbl">${ts.feito}/${ts.total} tarefas${ts.atrasado?` · <span style="color:var(--accent)">${ts.atrasado} atrasada(s)</span>`:''}</div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById("dashBody").innerHTML = html;
+
+  document.querySelectorAll(".card[data-code]").forEach(c=>{
+    c.addEventListener("click", ()=> openModal(c.dataset.code));
+  });
+}
+
+let chartInstance = null;
+function openModal(code){
+  const g = STATE[code]; if(!g) return;
+  const d = g.latest.data||{};
+  const fin = currentFin(g);
+  const com = d.comercial||{};
+  const horas = d.horas||{};
+  const mud = d.mudancas||{};
+  const tarefas = d.tarefas||[];
+  const occ = ocupacao(g);
+  const rmem = ROSTER.find(x=>x.code===code)||{};
+
+  const statusLbl = {feito:"Feito",em_andamento:"Em and.",atrasado:"Atrasado",nao_comecou:"Não começou",cancelado:"Cancelado"};
+  const prioLbl = {max:"MAX",alta:"ALTA",media:"MÉD"};
+
+  let tHtml = tarefas.length ? '<div class="tlist">'+ tarefas.map(t=>`
+      <div class="titem">
+        <span class="tstatus ts-${t.status||'nao_comecou'}">${statusLbl[t.status]||"—"}</span>
+        <div class="tdesc"><span class="tprio">[${prioLbl[t.prioridade]||'ALTA'}]</span> ${esc(t.desc||'(sem descrição)')}
+        ${t.obs?`<div class="dim" style="font-size:12px;margin-top:3px">↳ ${esc(t.obs)}</div>`:''}</div>
+      </div>`).join('')+'</div>' : '<div class="dim">Nenhuma tarefa reportada.</div>';
+
+  const mudRows = [];
+  if(mud.contratacoes) mudRows.push(['Contratações / time', mud.contratacoes]);
+  if(mud.saidas) mudRows.push(['Saídas / demissões', mud.saidas]);
+  if(mud.processo) mudRows.push(['Mudança de processo', mud.processo]);
+  if(mud.cliente) mudRows.push(['Cliente (ganho/perdido)', mud.cliente]);
+  if(mud.gargalo) mudRows.push(['Novo gargalo', mud.gargalo]);
+  if(mud.livre) mudRows.push(['Observação livre', mud.livre]);
+  const mudHtml = mudRows.length ? '<div class="muda">'+mudRows.map(r=>`<div class="row"><span class="lbl">${esc(r[0])}</span>${esc(r[1])}</div>`).join('')+'</div>'
+    : '<div class="dim">Sem mudanças estruturais reportadas.</div>';
+
+  // histórico financeiro
+  const fm = g.finMerged||{};
+  const histMeses = Object.keys(fm).filter(k=> fm[k] && (parseFloat(fm[k].faturamento)>0)).sort();
+  let histHtml = '';
+  if(histMeses.length){
+    histHtml = `<table class="hist"><thead><tr><th>Mês</th><th>Faturamento</th><th>Margem</th><th>Caixa</th><th>Projetos</th></tr></thead><tbody>`+
+      histMeses.map(k=>{ const x=fm[k]; return `<tr><td>${mesLabel(k)}</td><td>${fmtBRLfull(x.faturamento)}</td><td>${fmtPct(x.margem)}</td><td>${fmtBRLfull(x.caixa)}</td><td>${x.projetos||'—'}</td></tr>`;}).join('')+
+      `</tbody></table>`;
+  }
+
+  const txConv = (com.propostas&&com.fechados)? ((parseFloat(com.fechados)/parseFloat(com.propostas))*100).toFixed(0)+'%' : '—';
+
+  document.getElementById("modal").innerHTML = `
+    <div class="modal-hdr">
+      <div><h2>${esc(g.nome||rmem.nome)}</h2>
+      <div class="sub">${esc(rmem.quem||'')} · Código ${esc(g.code)} · Update ${mesLabel(g.latest.mes_ref)} · enviado ${timeAgo(g.latest.created_at)}</div></div>
+      <button class="x" id="closeX">×</button>
+    </div>
+
+    <div class="sect"><h3>1 · Financeiro — ${mesLabel(fin.mes)}</h3>
+      <div class="mgrid">
+        <div class="mbox"><div class="l">Faturamento</div><div class="n accent">${fmtBRLfull(fin.faturamento)}</div></div>
+        <div class="mbox"><div class="l">Margem líquida</div><div class="n ${parseFloat(fin.margem)>=15?'green':'amber'}">${fmtPct(fin.margem)}</div></div>
+        <div class="mbox"><div class="l">Custo fixo</div><div class="n">${fmtBRLfull(fin.custoFixo)}</div></div>
+        <div class="mbox"><div class="l">Pró-labore</div><div class="n">${fmtBRLfull(fin.proLabore)}</div></div>
+        <div class="mbox"><div class="l">Caixa reserva</div><div class="n">${fmtBRLfull(fin.caixa)}</div></div>
+        <div class="mbox"><div class="l">Projetos fechados</div><div class="n">${fin.projetos||'—'}</div></div>
+      </div>
+      ${fin.obs?`<div class="dim" style="font-size:12.5px;margin-top:10px">Obs: ${esc(fin.obs)}</div>`:''}
+    </div>
+
+    ${histMeses.length>1?`<div class="sect"><h3>Evolução do ano</h3><div class="chart-wrap"><canvas id="histChart"></canvas></div>
+      <div style="margin-top:14px">${histHtml}</div></div>`:(histMeses.length?`<div class="sect"><h3>Histórico</h3>${histHtml}</div>`:'')}
+
+    <div class="sect"><h3>2 · Horas do time</h3>
+      <div class="mgrid">
+        <div class="mbox"><div class="l">Horas totais</div><div class="n">${horas.total||'—'}h</div></div>
+        <div class="mbox"><div class="l">Faturáveis</div><div class="n">${horas.faturaveis||'—'}h</div></div>
+        <div class="mbox"><div class="l">Retrabalho</div><div class="n ${horas.retrabalho?'amber':''}">${horas.retrabalho||'—'}h</div></div>
+        <div class="mbox"><div class="l">Ocupação produtiva</div><div class="n ${occ!=null&&occ>=60?'green':'amber'}">${occ!=null?occ+'%':'—'}</div></div>
+        <div class="mbox"><div class="l">Custo médio/hora</div><div class="n">${fmtBRLfull(horas.custoHora)}</div></div>
+      </div>
+      ${horas.obs?`<div class="dim" style="font-size:12.5px;margin-top:10px">Obs: ${esc(horas.obs)}</div>`:''}
+    </div>
+
+    <div class="sect"><h3>3 · Tarefas e metas</h3>${tHtml}</div>
+
+    <div class="sect"><h3>4 · Comercial</h3>
+      <div class="mgrid">
+        <div class="mbox"><div class="l">Leads novos</div><div class="n">${com.leads||'—'}</div></div>
+        <div class="mbox"><div class="l">Reuniões</div><div class="n">${com.reunioes||'—'}</div></div>
+        <div class="mbox"><div class="l">Propostas enviadas</div><div class="n">${com.propostas||'—'}</div></div>
+        <div class="mbox"><div class="l">Propostas fechadas</div><div class="n green">${com.fechados||'—'}</div></div>
+        <div class="mbox"><div class="l">Valor fechado</div><div class="n accent">${fmtBRL(com.valorFechado)}</div></div>
+        <div class="mbox"><div class="l">Conversão</div><div class="n">${txConv}</div></div>
+        <div class="mbox"><div class="l">Pipeline aberto</div><div class="n">${fmtBRL(com.pipeline)}</div></div>
+        <div class="mbox"><div class="l">Prospecção ativa</div><div class="n" style="font-size:13px">${({sim_consistente:'Consistente',sim_irregular:'Irregular',nao:'Sem prospecção'})[com.prospec]||'—'}</div></div>
+      </div>
+      ${com.canal?`<div class="dim" style="font-size:12.5px;margin-top:10px">Canal principal: ${esc(com.canal)}</div>`:''}
+      ${com.obs?`<div class="dim" style="font-size:12.5px;margin-top:6px">Obs: ${esc(com.obs)}</div>`:''}
+    </div>
+
+    <div class="sect"><h3>5 · Mudanças estruturais</h3>${mudHtml}</div>
+  `;
+  document.getElementById("modalBg").classList.remove("hidden");
+  document.body.style.overflow="hidden";
+  document.getElementById("closeX").addEventListener("click", closeModal);
+
+  if(histMeses.length>1 && typeof Chart!=="undefined"){
+    const ctx=document.getElementById("histChart");
+    if(chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx,{
+      type:"line",
+      data:{ labels:histMeses.map(mesLabel),
+        datasets:[
+          {label:"Faturamento", data:histMeses.map(k=>parseFloat(fm[k].faturamento)||0),
+           borderColor:"#FF1E3D", backgroundColor:"rgba(255,30,61,.12)", fill:true, tension:.3, yAxisID:"y"},
+          {label:"Margem %", data:histMeses.map(k=>parseFloat(fm[k].margem)||0),
+           borderColor:"#4ADE80", backgroundColor:"transparent", tension:.3, yAxisID:"y1"}
+        ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:"#A1A1AA", font:{family:"Cairo"} } } },
+        scales:{
+          x:{ ticks:{color:"#71717A"}, grid:{color:"#2B2B2E"} },
+          y:{ position:"left", ticks:{color:"#71717A", callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"#2B2B2E"} },
+          y1:{ position:"right", ticks:{color:"#4ADE80", callback:v=>v+"%"}, grid:{drawOnChartArea:false} }
+        } }
+    });
+  }
+}
+function closeModal(){ document.getElementById("modalBg").classList.add("hidden"); document.body.style.overflow=""; if(chartInstance){chartInstance.destroy();chartInstance=null;} }
+document.getElementById("modalBg").addEventListener("click",(e)=>{ if(e.target.id==="modalBg") closeModal(); });
+document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
+
+// ===== FLOW =====
+async function loadAndRender(){
+  document.getElementById("dashBody").innerHTML = '<div class="loading">Carregando updates...</div>';
+  try{
+    const rows = await fetchSubmissions();
+    const map = groupByMentee(rows);
+    renderDashboard(map);
+  }catch(e){
+    if(String(e.message).includes("expirada")){ doLogout(); return; }
+    document.getElementById("dashBody").innerHTML = '<div class="loading">Erro ao carregar: '+esc(e.message)+'</div>';
+  }
+}
+function showDash(){ document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("dashScreen").classList.remove("hidden"); loadAndRender(); }
+function showLogin(){ document.getElementById("dashScreen").classList.add("hidden"); document.getElementById("loginScreen").classList.remove("hidden"); }
+function doLogout(){ clearSession(); showLogin(); }
+
+document.getElementById("loginBtn").addEventListener("click", async ()=>{
+  const btn=document.getElementById("loginBtn"); const err=document.getElementById("loginErr");
+  const email=document.getElementById("email").value.trim();
+  const pwd=document.getElementById("password").value;
+  if(!email||!pwd){ err.textContent="Preencha e-mail e senha."; err.classList.remove("hidden"); return; }
+  err.classList.add("hidden"); btn.disabled=true; btn.textContent="Entrando...";
+  try{ await login(email,pwd); showDash(); }
+  catch(e){ err.textContent=e.message; err.classList.remove("hidden"); }
+  finally{ btn.disabled=false; btn.textContent="Entrar"; }
+});
+document.getElementById("password").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("loginBtn").click(); });
+document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
+document.getElementById("logoutBtn").addEventListener("click", doLogout);
+
+// auto-login se sessão válida
+(async ()=>{ const s=await validToken(); if(s) showDash(); else showLogin(); })();
+</script>
+</body>
+</html>
