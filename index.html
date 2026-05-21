@@ -418,6 +418,16 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); opacity: 1
 }
 .action-bar h3 { margin: 0 0 4px; font-size: 17px; font-weight: 650; }
 .action-bar p { margin: 0 0 14px; color: rgba(255,255,255,0.7); font-size: 13px; }
+.send-warning {
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  border-radius: 10px; padding: 14px 16px; margin: 18px 0 4px;
+  font-size: 13.5px; line-height: 1.55; color: var(--text);
+}
+.send-warning strong { color: var(--accent); }
+.action-bar .send-note {
+  background: rgba(0,0,0,0.22); border-radius: 8px; padding: 10px 12px;
+  margin: 0 0 14px; font-size: 12.5px; color: #fff; font-weight: 600;
+}
 .action-bar .generate {
   background: var(--accent); color: #fff; border: none;
   padding: 13px 28px; border-radius: 8px;
@@ -543,6 +553,10 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); opacity: 1
       <span class="autosave" id="autosave">Salvo automaticamente</span>
       <button class="logout" id="logoutBtn">Sair</button>
     </div>
+  </div>
+
+  <div class="send-warning">
+    <strong>⚠ Importante:</strong> preencher os campos <strong>não envia</strong> nada ainda — fica salvo só no seu navegador, como rascunho. Seu update só chega ao mentor depois que você clicar em <strong>"Gerar Update Mensal"</strong>, lá no final desta página.
   </div>
 
   <!-- SECTION 1: FINANCEIRO — TABELA MENSAL -->
@@ -731,7 +745,8 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); opacity: 1
 
   <div class="action-bar">
     <h3>Gerar update do mês</h3>
-    <p>Vai gerar um texto formatado. Copie e envie ao seu mentor por WhatsApp ou email.</p>
+    <p>Este é o passo que realmente envia seu update ao mentor.</p>
+    <div class="send-note">Clique no botão abaixo para enviar. Sem clicar aqui, nada do que você preencheu chega ao mentor.</div>
     <button class="generate" id="generateBtn">Gerar Update Mensal</button>
     <button class="secondary" id="clearBtn">Limpar tabela financeira</button>
   </div>
