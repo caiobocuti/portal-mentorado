@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Portal do Aluno · Publi Advisor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0B0B0C; --surface:#161617; --surface-alt:#1E1E20;
+  --border:#2B2B2E; --border-strong:#3C3C40;
+  --text:#F4F4F5; --text-muted:#A1A1AA; --text-faint:#71717A;
+  --accent:#FF1E3D; --accent-soft:#2B0D12; --ink:#FF1E3D;
+  --green:#4ADE80; --green-soft:#12251A;
+  --amber:#FBBF24; --amber-soft:#2A220A;
+  --blue:#5cc8ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Cairo",-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Helvetica,Arial,sans-serif;
+  background:radial-gradient(1200px 600px at 80% -10%, #19090c 0%, transparent 60%), var(--bg);
+  color:var(--text); min-height:100vh; line-height:1.55; letter-spacing:.01em;
+}
+input{color:var(--text);font-family:inherit}
+input::placeholder{color:var(--text-faint);opacity:1}
+.hidden{display:none!important}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 20px 70px}
+a{color:var(--accent)}
+
+/* ===== LOGIN ===== */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:36px 32px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.brand{font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--accent);font-weight:700;margin-bottom:8px}
+.login-card h1{font-size:24px;font-weight:900;margin-bottom:4px}
+.login-card .sub{color:var(--text-muted);font-size:13.5px;margin-bottom:24px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);font-weight:600;margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;background:var(--surface-alt);
+  border:1px solid var(--border-strong);border-radius:8px;font-size:15px}
+.field input:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:var(--ink)}
+.btn-main{width:100%;padding:13px;margin-top:6px;background:var(--ink);color:#fff;border:none;
+  border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-main:hover{filter:brightness(1.08)}
+.btn-main:disabled{opacity:.5;cursor:default}
+.login-err{background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent);
+  padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px}
+.login-card .hint{margin-top:16px;font-size:12px;color:var(--text-muted);text-align:center;line-height:1.6}
+
+/* ===== HEADER ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  margin-bottom:8px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.topbar h1{font-size:24px;font-weight:900}
+.topbar .empresa{font-size:13px;color:var(--text-muted);margin-top:2px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.btn-ghost{background:transparent;border:1px solid var(--border-strong);color:var(--text-muted);
+  padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600}
+.btn-ghost:hover{border-color:var(--accent);color:var(--text)}
+.momento-badge{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:4px 10px;border-radius:20px;background:var(--accent-soft);color:var(--accent);margin-top:8px}
+
+/* ===== NAV ===== */
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 24px;position:sticky;top:0;z-index:10;
+  background:var(--bg);padding:10px 0}
+.nav a{font-size:13px;font-weight:600;color:var(--text-muted);text-decoration:none;
+  padding:7px 12px;border-radius:8px;border:1px solid var(--border)}
+.nav a:hover{border-color:var(--accent);color:var(--text)}
+
+/* ===== SECTIONS ===== */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px}
+.section h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);
+  font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.resumo{font-size:15px;line-height:1.65;color:var(--text)}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.kpi .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);font-weight:600;margin-bottom:6px}
+.kpi .v{font-size:25px;font-weight:900;line-height:1}
+.kpi .v.accent{color:var(--accent)} .kpi .v.green{color:var(--green)} .kpi .v.amber{color:var(--amber)}
+.kpi .d{font-size:11.5px;color:var(--text-muted);margin-top:5px}
+
+.chart-wrap{background:var(--surface-alt);border:1px solid var(--border);border-radius:10px;padding:14px;height:300px}
+.empty-fin{background:var(--surface-alt);border:1px dashed var(--border-strong);border-radius:10px;
+  padding:24px;text-align:center;color:var(--text-muted);font-size:14px;line-height:1.6}
+
+.mat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px}
+.mat-row{display:flex;align-items:center;gap:12px}
+.mat-row .lbl{width:120px;font-size:13px;color:var(--text-muted);flex-shrink:0}
+.mat-bar{flex:1;height:9px;background:var(--surface-alt);border-radius:6px;overflow:hidden}
+.mat-bar > span{display:block;height:100%}
+.mat-bar > span.low{background:var(--accent)} .mat-bar > span.mid{background:var(--amber)} .mat-bar > span.hi{background:var(--green)}
+.mat-row .num{width:26px;text-align:right;font-size:13px;font-weight:700}
+
+.alav{display:flex;flex-direction:column;gap:12px}
+.alav-card{background:var(--surface-alt);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 16px}
+.alav-card .t{font-size:15px;font-weight:800;margin-bottom:6px}
+.alav-card .m{font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:8px}
+.alav-card .i{font-size:13px;font-weight:700;color:var(--green);background:var(--green-soft);
+  display:inline-block;padding:5px 10px;border-radius:6px}
+
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.clean li{font-size:14px;line-height:1.55;padding-left:20px;position:relative;color:var(--text)}
+ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+
+.tlist{display:flex;flex-direction:column;gap:8px}
+.titem{background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:11px 13px;display:flex;align-items:flex-start;gap:11px}
+.tstatus{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:5px;white-space:nowrap;margin-top:1px}
+.ts-concluida{background:var(--green-soft);color:var(--green)}
+.ts-em_andamento{background:#0d1f2b;color:var(--blue)}
+.ts-atrasada{background:var(--accent-soft);color:var(--accent)}
+.ts-pendente{background:var(--surface);color:var(--text-faint);border:1px solid var(--border)}
+.ts-cancelada{background:var(--surface);color:var(--text-faint);text-decoration:line-through}
+.titem .td{font-size:13.5px;flex:1}
+.titem .tp{font-size:10px;font-weight:700;color:var(--accent)}
+.titem .tprz{font-size:11px;color:var(--text-faint);margin-top:3px}
+
+.comgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.mbox{background:var(--surface-alt);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.mbox .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-weight:600}
+.mbox .n{font-size:17px;font-weight:800;margin-top:3px}
+.mbox .n.green{color:var(--green)} .mbox .n.accent{color:var(--accent)}
+
+.direcao{font-size:14.5px;line-height:1.7;color:var(--text);background:var(--surface-alt);
+  border-radius:10px;padding:16px 18px;border:1px solid var(--border)}
+.materiais a.mat-link{display:flex;align-items:center;gap:10px;background:var(--surface-alt);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;text-decoration:none;color:var(--text);font-size:14px;font-weight:600;margin-bottom:8px}
+.materiais a.mat-link:hover{border-color:var(--accent)}
+.materiais .none{color:var(--text-faint);font-size:13.5px}
+.loading{text-align:center;padding:80px 0;color:var(--text-muted);font-size:14px}
+@media(max-width:760px){.kpis{grid-template-columns:1fr 1fr}.mat-grid{grid-template-columns:1fr}.comgrid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <div class="brand">Mentoria · Publi Advisor</div>
+    <h1>Portal do Aluno</h1>
+    <div class="sub">Sua central de estratégia, metas e resultados.</div>
+    <div id="loginErr" class="login-err hidden"></div>
+    <div class="field">
+      <label>E-mail de acesso</label>
+      <input type="email" id="email" placeholder="seu acesso" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="password" placeholder="sua senha" autocomplete="current-password">
+    </div>
+    <button class="btn-main" id="loginBtn">Entrar</button>
+    <div class="hint">Use o e-mail e a senha que seu mentor enviou. Acesso individual e privado da sua produtora.</div>
+  </div>
+</div>
+
+<!-- ========== DASHBOARD ========== -->
+<div id="dashScreen" class="wrap hidden">
+  <div class="topbar">
+    <div>
+      <div class="brand">Mentoria · Publi Advisor</div>
+      <h1 id="nomeProdutora">—</h1>
+      <div class="empresa" id="empresaProdutora">—</div>
+      <span class="momento-badge" id="momentoBadge">—</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-ghost" id="refreshBtn">↻ Atualizar</button>
+      <button class="btn-ghost" id="logoutBtn">Sair</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <a href="#visao">Visão geral</a>
+    <a href="#metas">Metas & faturamento</a>
+    <a href="#alavancas">Alavancas de ganho</a>
+    <a href="#comercial">Comercial</a>
+    <a href="#plano">Plano de ação</a>
+    <a href="#direcao">Direção estratégica</a>
+    <a href="#materiais">Documentos</a>
+  </div>
+
+  <div id="dashBody"><div class="loading">Carregando seus dados...</div></div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const SUPABASE_URL = "https://ywamkvmlspmposatzyhp.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3YW1rdm1sc3BtcG9zYXR6eWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNTg4MzAsImV4cCI6MjA5NDkzNDgzMH0.T0OS8sxEdsdSr4oiAg881FKO90CfY2-cIvl5ibQGPHQ";
+const SESSION_KEY = "aluno-session";
+const PORTAL_UPDATE_URL = "https://caiobocuti.github.io/portal-mentorado/";
+const MESES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const MOMENTO_LBL = { sobrevivencia:"Sobrevivência", estruturacao:"Estruturação", crescimento:"Crescimento", escala:"Escala" };
+const MAT_LBL = { comercial:"Comercial", operacao:"Operação", financeiro:"Financeiro", posicionamento:"Posicionamento", lideranca:"Liderança", gestao:"Gestão", escalabilidade:"Escalabilidade" };
+const STATUS_LBL = { concluida:"Concluída", em_andamento:"Em andamento", atrasada:"Atrasada", pendente:"A fazer", cancelada:"Cancelada" };
+const PRIO_LBL = { maxima:"MÁX", alta:"ALTA", media:"MÉD" };
+
+// ===== HELPERS =====
+function fmtBRL(v){ if(v===""||v==null) return "—"; const n=parseFloat(v); if(isNaN(n)) return "—";
+  if(Math.abs(n)>=1000) return "R$ "+(n/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})+"k";
+  return "R$ "+n.toLocaleString("pt-BR",{maximumFractionDigits:0}); }
+function fmtPct(v){ if(v===""||v==null) return "—"; const n=parseFloat(v); if(isNaN(n)) return "—"; return n+"%"; }
+function mesLabel(k){ if(!k) return "—"; const [y,m]=k.split("-"); return (MESES[parseInt(m,10)-1]||"?")+"/"+y; }
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+function fillClass(v){ return v<=3?"low":v<=6?"mid":"hi"; }
+
+// ===== AUTH =====
+function getSession(){ try{ return JSON.parse(localStorage.getItem(SESSION_KEY)||"null"); }catch(e){ return null; } }
+function setSession(s){ localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+
+async function login(email, password){
+  const r = await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password", {
+    method:"POST",
+    headers:{ "apikey":SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const j = await r.json();
+  if(!r.ok){ throw new Error(j.error_description || j.msg || j.error || ("Falha no login ("+r.status+")")); }
+  const am = (j.user && j.user.app_metadata) || {};
+  if(!am.code){ throw new Error("Conta sem produtora vinculada. Fale com seu mentor."); }
+  const sess = { access_token:j.access_token, refresh_token:j.refresh_token,
+    expires_at: Date.now()+(j.expires_in||3600)*1000, email,
+    code: am.code, content: am.content||null };
+  setSession(sess);
+  return sess;
+}
+async function refreshSession(){
+  const s=getSession(); if(!s||!s.refresh_token) return null;
+  const r = await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=refresh_token", {
+    method:"POST", headers:{ "apikey":SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+    body: JSON.stringify({ refresh_token:s.refresh_token })
+  });
+  if(!r.ok){ clearSession(); return null; }
+  const j = await r.json();
+  const am = (j.user && j.user.app_metadata) || {};
+  const sess = { access_token:j.access_token, refresh_token:j.refresh_token,
+    expires_at: Date.now()+(j.expires_in||3600)*1000, email:s.email,
+    code: am.code || s.code, content: am.content || s.content };
+  setSession(sess); return sess;
+}
+async function validToken(){ let s=getSession(); if(!s) return null;
+  if(Date.now() > s.expires_at - 60000){ s = await refreshSession(); } return s; }
+
+// ===== DATA =====
+async function fetchSubmissions(code){
+  let s = await validToken(); if(!s) throw new Error("expirada");
+  const r = await fetch(SUPABASE_URL+"/rest/v1/submissions?mentee_code=eq."+encodeURIComponent(code)+"&select=*&order=created_at.desc", {
+    headers:{ "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer "+s.access_token }
+  });
+  if(r.status===401){ const ns=await refreshSession(); if(!ns) throw new Error("expirada"); return fetchSubmissions(code); }
+  if(!r.ok) throw new Error("Erro ao buscar dados ("+r.status+")");
+  return r.json();
+}
+function mergeFin(subs){
+  const fm={};
+  [...subs].reverse().forEach(sub=>{ const f=(sub.data&&sub.data.financeiroMeses)||{};
+    Object.keys(f).forEach(k=>{ fm[k]=f[k]; }); });
+  return fm;
+}
+
+// ===== RENDER =====
+let chartInstance=null;
+function renderDashboard(content, subs){
+  const fm = mergeFin(subs);
+  const meses = Object.keys(fm).filter(k=> fm[k] && parseFloat(fm[k].faturamento)>0).sort();
+  const ultimoFat = meses.length ? parseFloat(fm[meses[meses.length-1]].faturamento) : null;
+  const meta = content.metaFaturamentoMensal || null;
+  const ating = (ultimoFat!=null && meta) ? Math.round(ultimoFat/meta*100) : null;
+
+  document.getElementById("nomeProdutora").textContent = content.nome || "Produtora";
+  document.getElementById("empresaProdutora").textContent = content.empresa || "";
+  document.getElementById("momentoBadge").textContent = "Momento: " + (MOMENTO_LBL[content.momento] || content.momento || "—");
+
+  let html = "";
+
+  // KPIs
+  html += `<div class="kpis">
+    <div class="kpi"><div class="k">Faturamento (último mês)</div><div class="v accent">${ultimoFat!=null?fmtBRL(ultimoFat):'—'}</div><div class="d">${meses.length?mesLabel(meses[meses.length-1]):'sem update ainda'}</div></div>
+    <div class="kpi"><div class="k">Meta mensal</div><div class="v">${meta?fmtBRL(meta):'—'}</div><div class="d">meta do plano</div></div>
+    <div class="kpi"><div class="k">Atingimento</div><div class="v ${ating!=null?(ating>=100?'green':(ating>=70?'amber':'accent')):''}">${ating!=null?ating+'%':'—'}</div><div class="d">do realizado vs meta</div></div>
+    <div class="kpi"><div class="k">Meses preenchidos</div><div class="v">${meses.length}</div><div class="d">no portal de update</div></div>
+  </div>`;
+
+  // VISÃO
+  html += `<div class="section" id="visao"><h2>Visão geral</h2>
+    <div class="resumo">${esc(content.resumo||"")}</div>`;
+  if(content.maturidade){
+    html += `<h2 style="margin-top:22px">Maturidade do negócio (0-10)</h2><div class="mat-grid">`;
+    Object.keys(MAT_LBL).forEach(dim=>{ const v=content.maturidade[dim]; if(v==null) return;
+      html += `<div class="mat-row"><div class="lbl">${MAT_LBL[dim]}</div>
+        <div class="mat-bar"><span class="${fillClass(v)}" style="width:${v*10}%"></span></div>
+        <div class="num">${v}</div></div>`; });
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  // METAS & FATURAMENTO
+  html += `<div class="section" id="metas"><h2>Metas & faturamento</h2>`;
+  if(meses.length){
+    html += `<div class="chart-wrap"><canvas id="finChart"></canvas></div>
+      <div class="d" style="font-size:12px;color:var(--text-faint);margin-top:10px">Linha vermelha = sua meta mensal. Barras = faturamento que você preencheu no portal de update.</div>`;
+  } else {
+    html += `<div class="empty-fin">Você ainda não enviou nenhum update.<br>
+      Preencha seu primeiro mês no <a href="${PORTAL_UPDATE_URL}" target="_blank">portal de update</a> e clique em "Gerar Update Mensal" — seu faturamento vs. meta aparece aqui automaticamente.</div>`;
+  }
+  html += `</div>`;
+
+  // ALAVANCAS
+  if(content.alavancas && content.alavancas.length){
+    html += `<div class="section" id="alavancas"><h2>Alavancas de ganho — onde está o dinheiro</h2><div class="alav">`;
+    content.alavancas.forEach(a=>{ html += `<div class="alav-card">
+      <div class="t">${esc(a.titulo)}</div>
+      <div class="m">${esc(a.mecanismo)}</div>
+      <div class="i">${esc(a.impacto)}</div></div>`; });
+    html += `</div></div>`;
+  }
+
+  // COMERCIAL
+  const com = content.comercial||{};
+  html += `<div class="section" id="comercial"><h2>Comercial</h2>
+    <div class="comgrid">
+      <div class="mbox"><div class="l">Pipeline aberto</div><div class="n accent">${fmtBRL(com.pipelineValor)}</div></div>
+      <div class="mbox"><div class="l">Prospecção ativa</div><div class="n ${com.prospeccaoAtiva?'green':''}">${com.prospeccaoAtiva?'Sim':'Ainda não'}</div></div>
+      <div class="mbox"><div class="l">Canal principal</div><div class="n" style="font-size:13px">${esc(com.canalPrincipal||'—')}</div></div>
+    </div>`;
+  if(content.oportunidades && content.oportunidades.length){
+    html += `<h2 style="margin-top:20px">Oportunidades</h2><ul class="clean">`;
+    content.oportunidades.forEach(o=> html += `<li>${esc(o)}</li>`);
+    html += `</ul>`;
+  }
+  html += `</div>`;
+
+  // PLANO
+  if(content.plano && content.plano.length){
+    const order={atrasada:0,em_andamento:1,pendente:2,concluida:3,cancelada:4};
+    const po={maxima:0,alta:1,media:2};
+    const sorted=[...content.plano].sort((a,b)=> (po[a.prioridade]??1)-(po[b.prioridade]??1) || (order[a.status]??2)-(order[b.status]??2));
+    html += `<div class="section" id="plano"><h2>Plano de ação</h2><div class="tlist">`;
+    sorted.forEach(t=>{ html += `<div class="titem">
+      <span class="tstatus ts-${t.status||'pendente'}">${STATUS_LBL[t.status]||"A fazer"}</span>
+      <div class="td"><span class="tp">[${PRIO_LBL[t.prioridade]||'ALTA'}]</span> ${esc(t.descricao)}
+      ${t.prazo?`<div class="tprz">Prazo: ${esc(t.prazo)}</div>`:''}</div></div>`; });
+    html += `</div><div class="d" style="font-size:12px;color:var(--text-faint);margin-top:12px">Atualize o status de cada tarefa no <a href="${PORTAL_UPDATE_URL}" target="_blank">portal de update</a>, no seu update mensal.</div></div>`;
+  }
+
+  // DIREÇÃO
+  if(content.direcao){
+    html += `<div class="section" id="direcao"><h2>Direção estratégica</h2><div class="direcao">${esc(content.direcao)}</div></div>`;
+  }
+
+  // MATERIAIS
+  html += `<div class="section materiais" id="materiais"><h2>Documentos & materiais</h2>`;
+  if(content.materiais && content.materiais.length){
+    content.materiais.forEach(m=> html += `<a class="mat-link" href="${esc(m.url)}" target="_blank">📄 ${esc(m.titulo)}</a>`);
+  } else {
+    html += `<div class="none">Seu mentor ainda não anexou documentos aqui. Em breve: rate card, deck institucional e materiais da sua produtora.</div>`;
+  }
+  html += `</div>`;
+
+  document.getElementById("dashBody").innerHTML = html;
+
+  if(meses.length && typeof Chart!=="undefined"){
+    const ctx=document.getElementById("finChart");
+    if(chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx,{
+      data:{ labels: meses.map(mesLabel),
+        datasets:[
+          { type:"bar", label:"Faturamento", data: meses.map(k=>parseFloat(fm[k].faturamento)||0),
+            backgroundColor:"rgba(255,30,61,.55)", borderColor:"#FF1E3D", borderWidth:1, borderRadius:4 },
+          { type:"line", label:"Meta", data: meses.map(()=> meta||0),
+            borderColor:"#4ADE80", borderDash:[6,4], borderWidth:2, pointRadius:0, fill:false }
+        ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:"#A1A1AA", font:{family:"Cairo"} } } },
+        scales:{ x:{ ticks:{color:"#71717A"}, grid:{color:"#2B2B2E"} },
+          y:{ ticks:{color:"#71717A", callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"#2B2B2E"}, beginAtZero:true } } }
+    });
+  }
+}
+
+// ===== FLOW =====
+async function loadAndRender(){
+  document.getElementById("dashBody").innerHTML = '<div class="loading">Carregando seus dados...</div>';
+  try{
+    const s = await validToken(); if(!s){ doLogout(); return; }
+    if(!s.content){ document.getElementById("dashBody").innerHTML = '<div class="loading">Seu conteúdo ainda não foi configurado. Fale com seu mentor.</div>'; return; }
+    const subs = await fetchSubmissions(s.code);
+    renderDashboard(s.content, subs);
+  }catch(e){
+    if(String(e.message).includes("expirada")){ doLogout(); return; }
+    document.getElementById("dashBody").innerHTML = '<div class="loading">Erro ao carregar: '+esc(e.message)+'</div>';
+  }
+}
+function showDash(){ document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("dashScreen").classList.remove("hidden"); loadAndRender(); }
+function showLogin(){ document.getElementById("dashScreen").classList.add("hidden"); document.getElementById("loginScreen").classList.remove("hidden"); }
+function doLogout(){ clearSession(); showLogin(); }
+
+document.getElementById("loginBtn").addEventListener("click", async ()=>{
+  const btn=document.getElementById("loginBtn"), err=document.getElementById("loginErr");
+  const email=document.getElementById("email").value.trim(), pwd=document.getElementById("password").value;
+  if(!email||!pwd){ err.textContent="Preencha e-mail e senha."; err.classList.remove("hidden"); return; }
+  err.classList.add("hidden"); btn.disabled=true; btn.textContent="Entrando...";
+  try{ await login(email,pwd); showDash(); }
+  catch(e){ err.textContent=e.message; err.classList.remove("hidden"); }
+  finally{ btn.disabled=false; btn.textContent="Entrar"; }
+});
+document.getElementById("password").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("loginBtn").click(); });
+document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
+document.getElementById("logoutBtn").addEventListener("click", doLogout);
+
+(async ()=>{ const s=await validToken(); if(s) showDash(); else showLogin(); })();
+</script>
+</body>
+</html>
