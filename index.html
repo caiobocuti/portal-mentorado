@@ -715,6 +715,21 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); opacity: 1
       </div>
     </div>
 
+    <div class="grid2" style="margin-top:14px;">
+      <div class="field">
+        <label>Receita recorrente mensal · MRR (R$)</label>
+        <input type="number" id="c_mrr" placeholder="0" min="0" />
+      </div>
+      <div class="field">
+        <label>% do faturamento no maior cliente</label>
+        <input type="number" id="c_maiorCliente" placeholder="0" min="0" max="100" />
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label>% do faturamento nos 3 maiores clientes</label>
+      <input type="number" id="c_top3" placeholder="0" min="0" max="100" />
+    </div>
+
     <div class="field" style="margin-top:14px;">
       <label>Observação comercial (opcional)</label>
       <textarea id="c_obsComercial" placeholder="Lead importante perdido, deal grande em andamento, mudança no discurso comercial..."></textarea>
@@ -1009,9 +1024,17 @@ function loadGlobalData() {
 
   // Comercial
   if (data.comercial) {
-    ['leads','reunioes','propostas','fechados','valorFechado','pipeline','canal','prospec','obs'].forEach(f => {
+    ['leads','reunioes','propostas','fechados','valorFechado','pipeline','mrr','canal','prospec','obs'].forEach(f => {
       const el = document.getElementById(`c_${f === 'obs' ? 'obsComercial' : f}`);
       if (el && data.comercial[f]) el.value = data.comercial[f];
+    });
+  }
+
+  // Recorrência / concentração
+  if (data.concentracao) {
+    ['maiorCliente','top3'].forEach(f => {
+      const el = document.getElementById(`c_${f}`);
+      if (el && data.concentracao[f]) el.value = data.concentracao[f];
     });
   }
 
@@ -1389,9 +1412,16 @@ function collectData() {
     fechados: document.getElementById("c_fechados").value,
     valorFechado: document.getElementById("c_valorFechado").value,
     pipeline: document.getElementById("c_pipeline").value,
+    mrr: document.getElementById("c_mrr").value,
     canal: document.getElementById("c_canal").value,
     prospec: document.getElementById("c_prospec").value,
     obs: document.getElementById("c_obsComercial").value
+  };
+
+  // Recorrência / concentração
+  data.concentracao = {
+    maiorCliente: document.getElementById("c_maiorCliente").value,
+    top3: document.getElementById("c_top3").value
   };
 
   // Mudanças
@@ -1556,6 +1586,9 @@ function generateMarkdown() {
     md += `- Taxa de conversão: ${tx}%\n`;
   }
   md += `- Pipeline aberto: ${fmtBRL(data.comercial.pipeline)}\n`;
+  if (data.comercial.mrr) md += `- Receita recorrente mensal (MRR): ${fmtBRL(data.comercial.mrr)}\n`;
+  if (data.concentracao && data.concentracao.maiorCliente) md += `- Concentração — maior cliente: ${data.concentracao.maiorCliente}%\n`;
+  if (data.concentracao && data.concentracao.top3) md += `- Concentração — 3 maiores: ${data.concentracao.top3}%\n`;
   if (data.comercial.canal) md += `- Canal principal: ${data.comercial.canal}\n`;
   if (data.comercial.prospec) {
     const labels = { sim_consistente: "✓ Cadência consistente", sim_irregular: "→ Irregular", nao: "✗ Sem prospecção ativa" };
