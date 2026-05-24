@@ -558,6 +558,10 @@ function maturitySnapshot(content, sub){
   const trackingS=blocks? Math.round(blocks/3*10) : null;
   const headroomS=(ocup==null)?null:(ocup<70?9:ocup<=85?6:3);
 
+  // A Régua só calcula sozinha quando a produtora enviou algum dado de update.
+  // Antes do 1º update, todas as dimensões usam a baseline definida pelo mentor.
+  const anySubData = finFilled || horasFilled || (prop!=null) || (num(c.pipeline)!=null) || (mrr!=null) || (num(c.fechados)!=null) || (num(c.valorFechado)!=null) || (concV!=null) || (tarefas.length>0);
+
   const dims={
     financeiro: avgNN([margemS,recorrS,atingS]),
     comercial: avgNN([convS,covS,prospS]),
@@ -570,7 +574,7 @@ function maturitySnapshot(content, sub){
   const base=content.maturidade||{};
   const out={}; let calcCount=0, sum=0, n=0;
   Object.keys(MAT_LBL).forEach(k=>{
-    let v=dims[k]; const calc=(v!=null);
+    let v = anySubData ? dims[k] : null; const calc=(v!=null);
     if(v==null) v=(base[k]!=null? base[k] : null);
     if(v!=null){ v=Math.max(0,Math.min(10,Math.round(v))); sum+=v; n++; if(calc) calcCount++; }
     out[k]={val:v, calc};
