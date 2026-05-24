@@ -981,9 +981,13 @@ function viewsHTML(content, subs){
 
   // ===== APRENDIZADO =====
   const trilha = content.trilha || [];
-  let aprendizado = trilha.length
-    ? trilha.map(id=>{ const L=LESSON_LIBRARY[id]; if(!L) return '';
-        return `<details class="lesson"><summary><div><div class="lt">${esc(L.titulo)}</div><div class="lr">${esc(L.resumo)}</div></div><span class="chev">▸</span></summary><div class="lbody">${L.corpo}</div></details>`; }).join('')
+  const trilhaExtra = (content.trilhaExtra||[]).filter(a=>a && (a.titulo||a.corpo));
+  const libLessons = trilha.map(id=>{ const L=LESSON_LIBRARY[id]; if(!L) return '';
+        return `<details class="lesson"><summary><div><div class="lt">${esc(L.titulo)}</div><div class="lr">${esc(L.resumo)}</div></div><span class="chev">▸</span></summary><div class="lbody">${L.corpo}</div></details>`; }).join('');
+  const extraLessons = trilhaExtra.map(a=>{ const corpo=esc(a.corpo||'').split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+        return `<details class="lesson"><summary><div><div class="lt">${esc(a.titulo||'Aula')}</div><div class="lr">${esc(a.resumo||'')}</div></div><span class="chev">▸</span></summary><div class="lbody">${corpo}</div></details>`; }).join('');
+  let aprendizado = (trilha.length || trilhaExtra.length)
+    ? (libLessons + extraLessons)
     : '<div class="materiais"><div class="none">Sua trilha de aprendizado ainda não foi configurada. Fale com seu mentor.</div></div>';
 
   const atualizar = buildFormHTML(content, subs);
@@ -1070,7 +1074,9 @@ function renderAlav(){ const box=document.getElementById("ce_al"); if(!box) retu
   box.innerHTML = arr.map((a,i)=>`<div class="ce-card"><div class="ce-cardhd"><span class="okr-onum">A${i+1}</span><button class="okr-x" data-ce="del" data-list="alavancas" data-i="${i}" title="Remover">×</button></div><input class="ce-f" data-ce="alav" data-i="${i}" data-f="titulo" placeholder="Título da alavanca" value="${esc(a.titulo||"")}"><textarea class="ce-f" data-ce="alav" data-i="${i}" data-f="mecanismo" placeholder="Mecanismo (como funciona)">${esc(a.mecanismo||"")}</textarea><input class="ce-f" data-ce="alav" data-i="${i}" data-f="impacto" placeholder="Impacto (ex.: +R$ 100k/ano)" value="${esc(a.impacto||"")}"></div>`).join("") || '<div class="mat-note">Nenhuma alavanca — clique em adicionar.</div>'; }
 function renderPlano(){ const box=document.getElementById("ce_pl"); if(!box) return; const arr=_ce.plano||[];
   box.innerHTML = arr.map((p,i)=>`<div class="ce-card"><div class="ce-cardhd"><select class="ce-f" data-ce="plano" data-i="${i}" data-f="prioridade">${["maxima","alta","media"].map(o=>`<option value="${o}" ${p.prioridade===o?"selected":""}>${PRIO_LBL[o]}</option>`).join("")}</select><select class="ce-f" data-ce="plano" data-i="${i}" data-f="status">${["","pendente","em_andamento","concluida","atrasada","cancelada"].map(o=>`<option value="${o}" ${(p.status||"")===o?"selected":""}>${o===""?"— status —":STATUS_LBL[o]}</option>`).join("")}</select><button class="okr-x" data-ce="del" data-list="plano" data-i="${i}" title="Remover">×</button></div><input class="ce-f" data-ce="plano" data-i="${i}" data-f="descricao" placeholder="Descrição da tarefa" value="${esc(p.descricao||"")}"><input class="ce-f" data-ce="plano" data-i="${i}" data-f="prazo" placeholder="Prazo (ex.: 30 dias)" value="${esc(p.prazo||"")}"></div>`).join("") || '<div class="mat-note">Nenhuma tarefa — clique em adicionar.</div>'; }
-function renderAllCE(){ renderStrList("ce_op","oportunidades"); renderAlav(); renderPlano(); renderStrList("ce_dr","diag.redes",true); renderStrList("ce_dc","diag.cruzamento",true); renderStrList("ce_dg","diag.ganhos",true); renderStrList("ce_drf","diag.reflexao",true); renderDocs(); }
+function renderTrilhaExtra(){ const box=document.getElementById("ce_tx"); if(!box) return; const arr=_ce.trilhaExtra||[];
+  box.innerHTML = arr.map((a,i)=>`<div class="ce-card"><div class="ce-cardhd"><span class="okr-onum">★${i+1}</span><button class="okr-x" data-ce="del" data-list="trilhaExtra" data-i="${i}" title="Remover">×</button></div><input class="ce-f" data-ce="trx" data-i="${i}" data-f="titulo" placeholder="Título da aula" value="${esc(a.titulo||"")}"><input class="ce-f" data-ce="trx" data-i="${i}" data-f="resumo" placeholder="Resumo curto (1 linha)" value="${esc(a.resumo||"")}"><textarea class="ce-f" data-ce="trx" data-i="${i}" data-f="corpo" placeholder="Conteúdo da aula (texto)">${esc(a.corpo||"")}</textarea></div>`).join("") || '<div class="mat-note">Nenhuma aula própria — clique em adicionar.</div>'; }
+function renderAllCE(){ renderStrList("ce_op","oportunidades"); renderAlav(); renderPlano(); renderStrList("ce_dr","diag.redes",true); renderStrList("ce_dc","diag.cruzamento",true); renderStrList("ce_dg","diag.ganhos",true); renderStrList("ce_drf","diag.reflexao",true); renderTrilhaExtra(); renderDocs(); }
 function renderDocs(){ const box=document.getElementById("ce_docs"); if(!box) return; const arr=_ce.materiais||[];
   box.innerHTML = arr.map((m,i)=>`<div class="ce-doc"><span>📄</span><span class="dn">${esc(m.titulo||m.path||m.url||"")}${m.path?'':' <span class="dim" style="font-size:11px">(link externo)</span>'}</span><button class="okr-x" data-ce="deldoc" data-i="${i}" title="Remover da lista">×</button></div>`).join("") || '<div class="mat-note">Nenhum documento ainda.</div>'; }
 async function uploadDoc(){
@@ -1096,7 +1102,7 @@ async function openDoc(path){
     const j=await r.json(); const su=j.signedURL||j.signedUrl; if(!su){ alert("Link não gerado."); return; } window.open(SUPABASE_URL+"/storage/v1"+su,"_blank");
   }catch(e){ alert("Erro ao abrir: "+e.message); }
 }
-function reRenderCE(list){ if(list==="oportunidades")renderStrList("ce_op",list); else if(list==="alavancas")renderAlav(); else if(list==="plano")renderPlano(); else if(list==="diag.redes")renderStrList("ce_dr",list,true); else if(list==="diag.cruzamento")renderStrList("ce_dc",list,true); else if(list==="diag.ganhos")renderStrList("ce_dg",list,true); else if(list==="diag.reflexao")renderStrList("ce_drf",list,true); }
+function reRenderCE(list){ if(list==="oportunidades")renderStrList("ce_op",list); else if(list==="alavancas")renderAlav(); else if(list==="plano")renderPlano(); else if(list==="diag.redes")renderStrList("ce_dr",list,true); else if(list==="diag.cruzamento")renderStrList("ce_dc",list,true); else if(list==="diag.ganhos")renderStrList("ce_dg",list,true); else if(list==="diag.reflexao")renderStrList("ce_drf",list,true); else if(list==="trilhaExtra")renderTrilhaExtra(); }
 function buildContentEditor(){
   const c=_ce||{}; const mat=c.maturidade||{}; const dg=c.diag||{};
   const moms=[["sobrevivencia","Sobrevivência"],["estruturacao","Estruturação"],["crescimento","Crescimento"],["escala","Escala"]];
@@ -1115,7 +1121,8 @@ function buildContentEditor(){
   <div class="form-sec"><h3>Oportunidades</h3><div id="ce_op"></div><button class="okr-addobj" data-ce="add" data-list="oportunidades">+ Adicionar oportunidade</button></div>
   <div class="form-sec"><h3>Alavancas de ganho</h3><div id="ce_al"></div><button class="okr-addobj" data-ce="add" data-list="alavancas">+ Adicionar alavanca</button></div>
   <div class="form-sec"><h3>Plano de ação</h3><div id="ce_pl"></div><button class="okr-addobj" data-ce="add" data-list="plano">+ Adicionar tarefa</button></div>
-  <div class="form-sec"><h3>Trilha de aprendizado</h3><div class="ce-chks">${trilha}</div></div>
+  <div class="form-sec"><h3>Trilha de aprendizado</h3><div class="desc">Marque as aulas da biblioteca e/ou crie aulas próprias para esta produtora.</div><div class="ce-chks">${trilha}</div>
+    <div class="block-title">Aulas próprias</div><div id="ce_tx"></div><button class="okr-addobj" data-ce="add" data-list="trilhaExtra">+ Adicionar aula própria</button></div>
   <div class="form-sec"><h3>Diagnóstico de redes</h3>
     <div class="fld"><label>Handle (Instagram)</label><input data-ce="diaghandle" value="${esc(dg.handle||"")}"></div>
     <div class="block-title">O que o Instagram diz hoje</div><div id="ce_dr"></div><button class="okr-addobj" data-ce="add" data-list="diag.redes">+ Adicionar parágrafo</button>
@@ -1152,13 +1159,14 @@ async function saveContent(){
     else if(a==="diaghandle"){ _ce.diag=_ce.diag||{}; _ce.diag.handle=t.value; }
     else if(a==="slist"){ const arr=ceList(t.dataset.list); arr[+t.dataset.i]=t.value; }
     else if(a==="alav"){ _ce.alavancas=_ce.alavancas||[]; (_ce.alavancas[+t.dataset.i]=_ce.alavancas[+t.dataset.i]||{})[t.dataset.f]=t.value; }
+    else if(a==="trx"){ _ce.trilhaExtra=_ce.trilhaExtra||[]; (_ce.trilhaExtra[+t.dataset.i]=_ce.trilhaExtra[+t.dataset.i]||{})[t.dataset.f]=t.value; }
     else if(a==="plano"){ _ce.plano=_ce.plano||[]; (_ce.plano[+t.dataset.i]=_ce.plano[+t.dataset.i]||{})[t.dataset.f]=t.value; } });
   vc.addEventListener("change", e=>{ const t=e.target; if(!t||!_ce) return; const a=t.dataset.ce; if(!a) return;
     if(a==="top"){ _ce[t.dataset.f]=t.value; }
     else if(a==="plano"){ _ce.plano=_ce.plano||[]; (_ce.plano[+t.dataset.i]=_ce.plano[+t.dataset.i]||{})[t.dataset.f]=t.value; }
     else if(a==="trilha"){ _ce.trilha=_ce.trilha||[]; const id=t.dataset.id, idx=_ce.trilha.indexOf(id); if(t.checked&&idx<0)_ce.trilha.push(id); if(!t.checked&&idx>-1)_ce.trilha.splice(idx,1); } });
   vc.addEventListener("click", e=>{ const b=e.target.closest("[data-ce]"); if(!b||!_ce) return; const a=b.dataset.ce;
-    if(a==="add"){ const list=b.dataset.list, arr=ceList(list); if(list==="alavancas")arr.push({titulo:"",mecanismo:"",impacto:""}); else if(list==="plano")arr.push({prioridade:"alta",descricao:"",prazo:"",status:""}); else arr.push(""); reRenderCE(list); }
+    if(a==="add"){ const list=b.dataset.list, arr=ceList(list); if(list==="alavancas")arr.push({titulo:"",mecanismo:"",impacto:""}); else if(list==="plano")arr.push({prioridade:"alta",descricao:"",prazo:"",status:""}); else if(list==="trilhaExtra")arr.push({titulo:"",resumo:"",corpo:""}); else arr.push(""); reRenderCE(list); }
     else if(a==="del"){ const list=b.dataset.list, arr=ceList(list); arr.splice(+b.dataset.i,1); reRenderCE(list); }
     else if(a==="upload"){ uploadDoc(); }
     else if(a==="deldoc"){ _ce.materiais=_ce.materiais||[]; _ce.materiais.splice(+b.dataset.i,1); renderDocs(); }
