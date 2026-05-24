@@ -542,6 +542,34 @@ document.getElementById("modalBg").addEventListener("click",(e)=>{ if(e.target.i
 document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
 
 // ===== EDIÇÃO + VISÃO ESTRATÉGICA (mentor) =====
+// ===== máscara de moeda (R$) =====
+function moneyMask(s){
+  s = String(s==null?"":s).replace(/[^\d,]/g,"");
+  const i = s.indexOf(",");
+  if(i!==-1) s = s.slice(0,i+1) + s.slice(i+1).replace(/,/g,"");
+  if(s==="") return "";
+  let parts = s.split(","); let ip = parts[0], dp = parts[1];
+  ip = (ip||"").replace(/^0+(?=\d)/,"");
+  if(ip==="" && dp===undefined) return "";
+  if(ip==="") ip = "0";
+  ip = ip.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  let out = "R$ " + ip;
+  if(dp!==undefined) out += "," + dp.slice(0,2);
+  return out;
+}
+function moneyParse(s){
+  s = String(s==null?"":s).replace(/[^\d,]/g,"").replace(",", ".");
+  if(s==="") return "";
+  const n = parseFloat(s);
+  return isNaN(n) ? "" : n;
+}
+function moneyInit(v){
+  if(v==null || v==="") return "";
+  const n = parseFloat(v); if(isNaN(n)) return "";
+  return "R$ " + n.toLocaleString("pt-BR", {maximumFractionDigits:2});
+}
+document.addEventListener("input", e=>{ const t=e.target; if(t&&t.classList&&t.classList.contains("money")){ t.value=moneyMask(t.value); } });
+
 function strategicDiagHTML(code){
   const c = MENTEE_CONTENT[code]; if(!c) return '';
   const up = "font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-weight:600;margin:10px 0 4px";
@@ -600,7 +628,7 @@ function openEditModal(code){
   if(!tarefas || !tarefas.length){ tarefas = ((MENTEE_CONTENT[code]&&MENTEE_CONTENT[code].plano)||[]).map(p=>({prioridade:p.prioridade, desc:p.descricao, status:'pendente', obs:''})); }
   const v = x => (x==null?'':x);
   const STAT = [['pendente','A fazer'],['em_andamento','Em andamento'],['concluida','Feito'],['atrasada','Atrasada'],['cancelada','Cancelada']];
-  const ef = (id,lbl,val) => `<div class="ef"><label>${lbl}</label><input id="${id}" value="${esc(v(val))}"></div>`;
+  const ef = (id,lbl,val,money) => `<div class="ef"><label>${lbl}</label><input id="${id}" ${money?'class="money" inputmode="decimal"':''} value="${esc(money?moneyInit(val):v(val))}"></div>`;
   const tHtml = tarefas.map(t=>`<div class="etask"><div class="ed"><b style="color:var(--accent);font-size:10px">[${esc((t.prioridade||'').toUpperCase())}]</b> ${esc(t.desc||'')}</div><select data-tk data-prio="${esc(t.prioridade||'')}" data-desc="${esc(t.desc||'')}">${STAT.map(s=>`<option value="${s[0]}" ${t.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}</select></div>`).join('');
   document.getElementById("modal").innerHTML = `
     <div class="modal-hdr">
@@ -611,27 +639,27 @@ function openEditModal(code){
       <div class="eform"><div class="ef"><label>Mês</label><input id="e_mes" type="month" value="${esc(ref)}"></div></div>
     </div>
     <div class="sect"><h3>Financeiro</h3><div class="eform">
-      ${ef('e_fat','Faturamento (R$)',f.faturamento)}
+      ${ef('e_fat','Faturamento (R$)',f.faturamento,true)}
       ${ef('e_margem','Margem (%)',f.margem)}
-      ${ef('e_cf','Custo fixo (R$)',f.custoFixo)}
-      ${ef('e_pl','Pró-labore (R$)',f.proLabore)}
-      ${ef('e_caixa','Caixa (R$)',f.caixa)}
+      ${ef('e_cf','Custo fixo (R$)',f.custoFixo,true)}
+      ${ef('e_pl','Pró-labore (R$)',f.proLabore,true)}
+      ${ef('e_caixa','Caixa (R$)',f.caixa,true)}
       ${ef('e_proj','Projetos fechados',f.projetos)}
     </div><div class="ef" style="margin-top:10px"><label>Observação</label><input id="e_fobs" value="${esc(v(f.obs))}"></div></div>
     <div class="sect"><h3>Horas</h3><div class="eform">
       ${ef('e_htot','Horas totais',h.total)}
       ${ef('e_hfav','Faturáveis',h.faturaveis)}
       ${ef('e_hretr','Retrabalho',h.retrabalho)}
-      ${ef('e_hch','Custo/hora (R$)',h.custoHora)}
+      ${ef('e_hch','Custo/hora (R$)',h.custoHora,true)}
     </div></div>
     <div class="sect"><h3>Comercial</h3><div class="eform">
       ${ef('e_leads','Leads',com.leads)}
       ${ef('e_reun','Reuniões',com.reunioes)}
       ${ef('e_prop','Propostas',com.propostas)}
       ${ef('e_fech','Fechadas',com.fechados)}
-      ${ef('e_vf','Valor fechado (R$)',com.valorFechado)}
-      ${ef('e_pipe','Pipeline (R$)',com.pipeline)}
-      ${ef('e_mrr','MRR (R$)',com.mrr)}
+      ${ef('e_vf','Valor fechado (R$)',com.valorFechado,true)}
+      ${ef('e_pipe','Pipeline (R$)',com.pipeline,true)}
+      ${ef('e_mrr','MRR (R$)',com.mrr,true)}
       ${ef('e_canal','Canal principal',com.canal)}
     </div></div>
     <div class="sect"><h3>Concentração de clientes</h3><div class="eform">
@@ -655,15 +683,16 @@ async function saveEdits(code){
   const g = STATE[code]; const rmem = ROSTER.find(x=>x.code===code)||{};
   const has = !!(g && g.latest);
   const gv = id => { const e=document.getElementById(id); return e?e.value.trim():''; };
+  const gvm = id => moneyParse(gv(id));
   const ref = gv('e_mes') || (new Date().toISOString().slice(0,7));
   const base = has ? JSON.parse(JSON.stringify(g.latest.data||{})) : {};
   base.financeiroMeses = base.financeiroMeses || {};
   base.financeiroMeses[ref] = Object.assign({}, base.financeiroMeses[ref]||{}, {
-    faturamento:gv('e_fat'), custoFixo:gv('e_cf'), proLabore:gv('e_pl'),
-    margem:gv('e_margem'), caixa:gv('e_caixa'), projetos:gv('e_proj'), obs:gv('e_fobs')
+    faturamento:gvm('e_fat'), custoFixo:gvm('e_cf'), proLabore:gvm('e_pl'),
+    margem:gv('e_margem'), caixa:gvm('e_caixa'), projetos:gv('e_proj'), obs:gv('e_fobs')
   });
-  base.horas = Object.assign({}, base.horas||{}, { total:gv('e_htot'), faturaveis:gv('e_hfav'), retrabalho:gv('e_hretr'), custoHora:gv('e_hch') });
-  base.comercial = Object.assign({}, base.comercial||{}, { leads:gv('e_leads'), reunioes:gv('e_reun'), propostas:gv('e_prop'), fechados:gv('e_fech'), valorFechado:gv('e_vf'), pipeline:gv('e_pipe'), mrr:gv('e_mrr'), canal:gv('e_canal') });
+  base.horas = Object.assign({}, base.horas||{}, { total:gv('e_htot'), faturaveis:gv('e_hfav'), retrabalho:gv('e_hretr'), custoHora:gvm('e_hch') });
+  base.comercial = Object.assign({}, base.comercial||{}, { leads:gv('e_leads'), reunioes:gv('e_reun'), propostas:gv('e_prop'), fechados:gv('e_fech'), valorFechado:gvm('e_vf'), pipeline:gvm('e_pipe'), mrr:gvm('e_mrr'), canal:gv('e_canal') });
   base.concentracao = Object.assign({}, base.concentracao||{}, { maiorCliente:gv('e_maior'), top3:gv('e_top3') });
   const tEls = document.querySelectorAll('[data-tk]');
   if(tEls.length){ const arr=[]; tEls.forEach(el=>arr.push({prioridade:el.dataset.prio, desc:el.dataset.desc, status:el.value, obs:''})); base.tarefas = arr; }
