@@ -568,6 +568,33 @@ function buildEvolucaoCharts(){
 }
 
 // ===== FORM (atualizar meus dados) =====
+// ===== máscara de moeda (R$) =====
+function moneyMask(s){
+  s = String(s==null?"":s).replace(/[^\d,]/g,"");
+  const i = s.indexOf(",");
+  if(i!==-1) s = s.slice(0,i+1) + s.slice(i+1).replace(/,/g,"");
+  if(s==="") return "";
+  let parts = s.split(","); let ip = parts[0], dp = parts[1];
+  ip = (ip||"").replace(/^0+(?=\d)/,"");
+  if(ip==="" && dp===undefined) return "";
+  if(ip==="") ip = "0";
+  ip = ip.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  let out = "R$ " + ip;
+  if(dp!==undefined) out += "," + dp.slice(0,2);
+  return out;
+}
+function moneyParse(s){
+  s = String(s==null?"":s).replace(/[^\d,]/g,"").replace(",", ".");
+  if(s==="") return "";
+  const n = parseFloat(s);
+  return isNaN(n) ? "" : n;
+}
+function moneyInit(v){
+  if(v==null || v==="") return "";
+  const n = parseFloat(v); if(isNaN(n)) return "";
+  return "R$ " + n.toLocaleString("pt-BR", {maximumFractionDigits:2});
+}
+
 function buildFormHTML(content, subs){
   const sub0=subs[0]||null; const d=(sub0&&sub0.data)||{};
   const fm=d.financeiroMeses||{}; const fmonths=Object.keys(fm).sort();
@@ -591,11 +618,11 @@ function buildFormHTML(content, subs){
     <div class="fgrid"><div class="fld"><label>Mês deste update</label><input type="month" id="f_mes" value="${lastK}"></div></div></div>
   <div class="form-sec"><h3>2 · Financeiro do mês</h3><div class="desc">Os números do mês de referência escolhido acima.</div>
     <div class="fgrid">
-      <div class="fld"><label>Faturamento bruto (R$)</label><input type="number" id="f_fat" min="0" value="${v(lf.faturamento)}"></div>
-      <div class="fld"><label>Custo fixo (R$)</label><input type="number" id="f_cf" min="0" value="${v(lf.custoFixo)}"></div>
-      <div class="fld"><label>Pró-labore (R$)</label><input type="number" id="f_pl" min="0" value="${v(lf.proLabore)}"></div>
+      <div class="fld"><label>Faturamento bruto (R$)</label><input type="text" inputmode="decimal" class="money" id="f_fat" placeholder="R$ 0" value="${moneyInit(lf.faturamento)}"></div>
+      <div class="fld"><label>Custo fixo (R$)</label><input type="text" inputmode="decimal" class="money" id="f_cf" placeholder="R$ 0" value="${moneyInit(lf.custoFixo)}"></div>
+      <div class="fld"><label>Pró-labore (R$)</label><input type="text" inputmode="decimal" class="money" id="f_pl" placeholder="R$ 0" value="${moneyInit(lf.proLabore)}"></div>
       <div class="fld"><label>Margem líquida (%)</label><input type="number" id="f_margem" min="0" max="100" value="${v(lf.margem)}"></div>
-      <div class="fld"><label>Caixa de reserva (R$)</label><input type="number" id="f_caixa" min="0" value="${v(lf.caixa)}"></div>
+      <div class="fld"><label>Caixa de reserva (R$)</label><input type="text" inputmode="decimal" class="money" id="f_caixa" placeholder="R$ 0" value="${moneyInit(lf.caixa)}"></div>
       <div class="fld"><label>Nº de projetos fechados</label><input type="number" id="f_proj" min="0" value="${v(lf.projetos)}"></div>
       <div class="fld full"><label>Observação</label><textarea id="f_obs">${esc(v(lf.obs))}</textarea></div>
     </div>${hist}</div>
@@ -604,7 +631,7 @@ function buildFormHTML(content, subs){
       <div class="fld"><label>Horas totais</label><input type="number" id="h_total" min="0" value="${v(h.total)}"></div>
       <div class="fld"><label>Horas faturáveis</label><input type="number" id="h_fav" min="0" value="${v(h.faturaveis)}"></div>
       <div class="fld"><label>Horas em retrabalho</label><input type="number" id="h_retr" min="0" value="${v(h.retrabalho)}"></div>
-      <div class="fld"><label>Custo médio da hora (R$)</label><input type="number" id="h_ch" min="0" value="${v(h.custoHora)}"></div>
+      <div class="fld"><label>Custo médio da hora (R$)</label><input type="text" inputmode="decimal" class="money" id="h_ch" placeholder="R$ 0" value="${moneyInit(h.custoHora)}"></div>
       <div class="fld full"><label>Observação</label><textarea id="h_obs">${esc(v(h.obs))}</textarea></div>
     </div></div>
   <div class="form-sec"><h3>4 · Comercial</h3><div class="desc">Pipeline e prospecção do mês.</div>
@@ -613,9 +640,9 @@ function buildFormHTML(content, subs){
       <div class="fld"><label>Reuniões</label><input type="number" id="c_reun" min="0" value="${v(c.reunioes)}"></div>
       <div class="fld"><label>Propostas enviadas</label><input type="number" id="c_prop" min="0" value="${v(c.propostas)}"></div>
       <div class="fld"><label>Propostas fechadas</label><input type="number" id="c_fech" min="0" value="${v(c.fechados)}"></div>
-      <div class="fld"><label>Valor fechado (R$)</label><input type="number" id="c_vf" min="0" value="${v(c.valorFechado)}"></div>
-      <div class="fld"><label>Pipeline aberto (R$)</label><input type="number" id="c_pipe" min="0" value="${v(c.pipeline)}"></div>
-      <div class="fld"><label>Receita recorrente / MRR (R$)</label><input type="number" id="c_mrr" min="0" value="${v(c.mrr)}"></div>
+      <div class="fld"><label>Valor fechado (R$)</label><input type="text" inputmode="decimal" class="money" id="c_vf" placeholder="R$ 0" value="${moneyInit(c.valorFechado)}"></div>
+      <div class="fld"><label>Pipeline aberto (R$)</label><input type="text" inputmode="decimal" class="money" id="c_pipe" placeholder="R$ 0" value="${moneyInit(c.pipeline)}"></div>
+      <div class="fld"><label>Receita recorrente / MRR (R$)</label><input type="text" inputmode="decimal" class="money" id="c_mrr" placeholder="R$ 0" value="${moneyInit(c.mrr)}"></div>
       <div class="fld"><label>Canal principal</label><input type="text" id="c_canal" value="${esc(v(c.canal))}"></div>
       <div class="fld"><label>Prospecção ativa?</label><select id="c_prospec">${prospOpts(c.prospec||"")}</select></div>
       <div class="fld full"><label>Observação</label><textarea id="c_obs">${esc(v(c.obs))}</textarea></div>
@@ -640,14 +667,15 @@ function buildFormHTML(content, subs){
 }
 function collectForm(){
   const g=id=>{ const e=document.getElementById(id); return e? e.value : ""; };
+  const gm=id=>moneyParse(g(id));
   const ref=g("f_mes")||currentYM();
   const prevFin=(CURRENT&&CURRENT.subs[0]&&CURRENT.subs[0].data&&CURRENT.subs[0].data.financeiroMeses)? Object.assign({},CURRENT.subs[0].data.financeiroMeses) : {};
-  prevFin[ref]={ faturamento:g("f_fat"), custoFixo:g("f_cf"), proLabore:g("f_pl"), margem:g("f_margem"), caixa:g("f_caixa"), projetos:g("f_proj"), obs:g("f_obs") };
+  prevFin[ref]={ faturamento:gm("f_fat"), custoFixo:gm("f_cf"), proLabore:gm("f_pl"), margem:g("f_margem"), caixa:gm("f_caixa"), projetos:g("f_proj"), obs:g("f_obs") };
   const tarefas=[]; document.querySelectorAll("#planoForm .tf-item").forEach(b=>{ const sel=b.querySelector("select"), ta=b.querySelector("textarea");
     tarefas.push({ prioridade:b.dataset.prio||"alta", desc:b.dataset.desc||"", status:sel?sel.value:"", obs:ta?ta.value:"" }); });
   const data={ financeiroMeses:prevFin,
-    horas:{ total:g("h_total"), faturaveis:g("h_fav"), retrabalho:g("h_retr"), custoHora:g("h_ch"), obs:g("h_obs") },
-    comercial:{ leads:g("c_leads"), reunioes:g("c_reun"), propostas:g("c_prop"), fechados:g("c_fech"), valorFechado:g("c_vf"), pipeline:g("c_pipe"), mrr:g("c_mrr"), canal:g("c_canal"), prospec:g("c_prospec"), obs:g("c_obs") },
+    horas:{ total:g("h_total"), faturaveis:g("h_fav"), retrabalho:g("h_retr"), custoHora:gm("h_ch"), obs:g("h_obs") },
+    comercial:{ leads:g("c_leads"), reunioes:g("c_reun"), propostas:g("c_prop"), fechados:g("c_fech"), valorFechado:gm("c_vf"), pipeline:gm("c_pipe"), mrr:gm("c_mrr"), canal:g("c_canal"), prospec:g("c_prospec"), obs:g("c_obs") },
     concentracao:{ maiorCliente:g("c_maior"), top3:g("c_top3") },
     mudancas:{ contratacoes:g("m_contr"), saidas:g("m_saidas"), processo:g("m_proc"), cliente:g("m_cli"), gargalo:g("m_garg"), livre:g("m_livre") },
     tarefas, mesAtivo:ref };
@@ -915,6 +943,7 @@ function doLogout(){ clearSession(); showLogin(); }
 
 document.getElementById("sideNav").addEventListener("click", e=>{ const b=e.target.closest("button[data-view]"); if(b) showView(b.dataset.view); });
 document.getElementById("viewContainer").addEventListener("click", e=>{ const g=e.target.closest("[data-goto]"); if(g){ e.preventDefault(); showView(g.dataset.goto); } });
+document.getElementById("viewContainer").addEventListener("input", e=>{ const t=e.target; if(t&&t.classList&&t.classList.contains("money")){ t.value=moneyMask(t.value); } });
 document.getElementById("loginBtn").addEventListener("click", async ()=>{
   const btn=document.getElementById("loginBtn"), err=document.getElementById("loginErr");
   const email=document.getElementById("email").value.trim(), pwd=document.getElementById("password").value;
