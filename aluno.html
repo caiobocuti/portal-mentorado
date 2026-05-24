@@ -708,9 +708,7 @@ function viewsHTML(content, subs){
   let visao;
   const diagHTML = diagBlockHTML(content);
   if(!hasSubs){
-    visao = diagHTML + `<div class="empty-fin">Você ainda não enviou nenhuma atualização.<br>
-      Vá em <a href="#" data-goto="atualizar">Atualizar meus dados</a>, preencha seus números e clique em "Salvar atualização" — seus gráficos aparecem aqui automaticamente.</div>
-      <div class="block-title">Resumo</div><div class="resumo">${esc(content.resumo||"")}</div>`;
+    visao = diagHTML + `<div class="block-title">Resumo</div><div class="resumo">${esc(content.resumo||"")}</div>`;
   } else {
     const matScore = _mat.overall!=null ? (Math.round(_mat.overall*10)/10) : null;
     const margemUlt = (finUlt && finUlt.margem) ? finUlt.margem : null;
