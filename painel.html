@@ -760,7 +760,7 @@ document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
 document.getElementById("logoutBtn").addEventListener("click", doLogout);
 
 // auto-login se sessão válida
-(async ()=>{ const s=await validToken(); if(s) showDash(); else showLogin(); })();
+(async ()=>{ const s=await validToken(); if(s && s.email==="caiobocuti@catalunyafilmes.com") showDash(); else { if(s) clearSession(); showLogin(); } })();
 </script>
 </body>
 </html>
