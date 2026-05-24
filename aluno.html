@@ -230,6 +230,18 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
 .mc .mct{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
 .mc .cnv{height:175px}
 
+/* diagnóstico de redes (topo da visão) */
+.diag{background:linear-gradient(180deg, rgba(255,30,61,.06), transparent 55%), var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:18px 20px;margin-bottom:18px}
+.diag-h{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.diag-ig{color:var(--text-faint);font-weight:600;text-transform:none;letter-spacing:0;margin-left:8px}
+.diag-sub{font-size:12px;color:var(--text-faint);margin-top:3px}
+.diag-sec{margin-top:15px}
+.diag-t{font-size:11.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.diag-sec p{font-size:13.5px;line-height:1.62;color:var(--text);margin:0 0 8px}
+.diag-sec ul{margin:0;padding-left:18px}
+.diag-sec li{font-size:13.5px;line-height:1.55;color:var(--text);margin-bottom:6px}
+.diag-sec.refl li{color:var(--text-muted)}
+
 /* radar */
 .radar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;height:360px}
 .mat-note{font-size:12px;color:var(--text-faint);margin-top:10px;line-height:1.5}
@@ -664,6 +676,21 @@ async function saveUpdate(){
 // ===== RENDER =====
 let VIEWS={}, CURRENT=null, MENTEE_CODE=null, _lastView="visao";
 let _fin=null, _mat=null, _matStage=null, _series=null;
+function diagBlockHTML(content){
+  const d = content.diag;
+  if(!d) return "";
+  const ps = arr => (arr||[]).map(p=>`<p>${esc(p)}</p>`).join('');
+  const lis = arr => (arr||[]).map(p=>`<li>${esc(p)}</li>`).join('');
+  let h = `<div class="diag"><div class="diag-h">Diagnóstico de posicionamento e redes${d.handle?`<span class="diag-ig">${esc(d.handle)}</span>`:''}</div>
+    <div class="diag-sub">Leitura do seu Instagram cruzada com a sua estratégia, feita pelo seu mentor.</div>`;
+  if(d.redes&&d.redes.length) h += `<div class="diag-sec"><div class="diag-t">O que o seu Instagram diz hoje</div>${ps(d.redes)}</div>`;
+  if(d.cruzamento&&d.cruzamento.length) h += `<div class="diag-sec"><div class="diag-t">Onde as suas redes e a sua estratégia se cruzam</div>${ps(d.cruzamento)}</div>`;
+  if(d.ganhos&&d.ganhos.length) h += `<div class="diag-sec"><div class="diag-t">Ganhos rápidos nas redes</div><ul>${lis(d.ganhos)}</ul></div>`;
+  if(d.reflexao&&d.reflexao.length) h += `<div class="diag-sec refl"><div class="diag-t">Para refletir</div><ul>${lis(d.reflexao)}</ul></div>`;
+  h += `</div>`;
+  return h;
+}
+
 function viewsHTML(content, subs){
   const fm = mergeFin(subs);
   const meses = Object.keys(fm).filter(k=> fm[k] && parseFloat(fm[k].faturamento)>0).sort();
@@ -679,14 +706,15 @@ function viewsHTML(content, subs){
 
   // VISÃO (dashboard compilado)
   let visao;
+  const diagHTML = diagBlockHTML(content);
   if(!hasSubs){
-    visao = `<div class="empty-fin">Você ainda não enviou nenhuma atualização.<br>
+    visao = diagHTML + `<div class="empty-fin">Você ainda não enviou nenhuma atualização.<br>
       Vá em <a href="#" data-goto="atualizar">Atualizar meus dados</a>, preencha seus números e clique em "Salvar atualização" — seus gráficos aparecem aqui automaticamente.</div>
       <div class="block-title">Resumo</div><div class="resumo">${esc(content.resumo||"")}</div>`;
   } else {
     const matScore = _mat.overall!=null ? (Math.round(_mat.overall*10)/10) : null;
     const margemUlt = (finUlt && finUlt.margem) ? finUlt.margem : null;
-    visao = `<div class="dash-tiles">
+    visao = diagHTML + `<div class="dash-tiles">
       <div class="kpi"><div class="k">Faturamento (último mês)</div><div class="v accent">${ultimoFat!=null?fmtBRL(ultimoFat):'—'}</div><div class="d">${meses.length?mesLabel(meses[meses.length-1]):'—'}</div></div>
       <div class="kpi"><div class="k">Atingimento da meta</div><div class="v ${ating!=null?(ating>=100?'green':(ating>=70?'amber':'accent')):''}">${ating!=null?ating+'%':'—'}</div><div class="d">meta ${meta?fmtBRL(meta):'—'}</div></div>
       <div class="kpi"><div class="k">Margem (último mês)</div><div class="v ${margemUlt!=null?(margemUlt>=25?'green':(margemUlt>=15?'amber':'accent')):''}">${margemUlt!=null?margemUlt+'%':'—'}</div><div class="d">lucro sobre a receita</div></div>
