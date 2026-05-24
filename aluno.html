@@ -233,6 +233,9 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
 #okrSaveBtn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px 22px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit}
 #okrSaveBtn:hover{filter:brightness(1.08)} #okrSaveBtn:disabled{opacity:.5;cursor:default}
 @media(max-width:680px){.okr-krhead{display:none}.okr-kr{grid-template-columns:1fr 1fr 32px}.okr-kr .kr-prog{grid-column:1/-1}}
+#mentorBar{background:var(--accent);color:#fff;font-size:13px;font-weight:600;padding:9px 16px;text-align:center}
+#mentorBar a{color:#fff;text-decoration:underline;margin-left:8px;font-weight:700}
+#mentorBar b{font-weight:800}
 .save-bar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 32%);padding:18px 0 6px;display:flex;align-items:center;gap:14px;margin-top:6px}
 .save-bar button{background:var(--ink);color:#fff;border:none;border-radius:9px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
 .save-bar button:hover{filter:brightness(1.08)} .save-bar button:disabled{opacity:.5;cursor:default}
@@ -440,13 +443,28 @@ async function refreshSession(){
 async function validToken(){ let s=getSession(); if(!s) return null;
   if(Date.now() > s.expires_at - 60000){ s = await refreshSession(); } return s; }
 
+// ===== MODO MENTOR (abrir o portal de uma produtora pelo acesso do mentor) =====
+const AS_CODE = (function(){ try{ return new URLSearchParams(location.search).get("as"); }catch(e){ return null; } })();
+const MENTOR_EMAIL = "caiobocuti@catalunyafilmes.com";
+function mentorSession(){ try{ const m=JSON.parse(localStorage.getItem("mentor-session")||"null"); if(m && m.email===MENTOR_EMAIL && m.access_token) return m; }catch(e){} return null; }
+function isMentorMode(){ return !!(AS_CODE && mentorSession()); }
+
 // ===== DATA =====
-async function fetchSubmissions(code){
-  let s = await validToken(); if(!s) throw new Error("expirada");
+async function fetchMenteeContent(code, token){
+  try{
+    const r = await fetch(SUPABASE_URL+"/rest/v1/mentee_content?code=eq."+encodeURIComponent(code)+"&select=content", {
+      headers:{ "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer "+token } });
+    if(!r.ok) return null;
+    const j = await r.json();
+    return (j && j[0] && j[0].content) ? j[0].content : null;
+  }catch(e){ return null; }
+}
+async function fetchSubmissions(code, token){
+  if(!token){ const s = await validToken(); if(!s) throw new Error("expirada"); token = s.access_token; }
   const r = await fetch(SUPABASE_URL+"/rest/v1/submissions?mentee_code=eq."+encodeURIComponent(code)+"&select=*&order=created_at.desc", {
-    headers:{ "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer "+s.access_token }
+    headers:{ "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer "+token }
   });
-  if(r.status===401){ const ns=await refreshSession(); if(!ns) throw new Error("expirada"); return fetchSubmissions(code); }
+  if(r.status===401){ if(isMentorMode()) throw new Error("expirada-mentor"); const ns=await refreshSession(); if(!ns) throw new Error("expirada"); return fetchSubmissions(code); }
   if(!r.ok) throw new Error("Erro ao buscar dados ("+r.status+")");
   return r.json();
 }
@@ -1021,15 +1039,27 @@ function renderApp(content, subs){
 async function loadAndRender(){
   document.getElementById("viewContainer").innerHTML = '<div class="loading">Carregando seus dados...</div>';
   try{
-    const s = await validToken(); if(!s){ doLogout(); return; }
-    if(!s.content){ document.getElementById("viewContainer").innerHTML = '<div class="loading">Seu conteúdo ainda não foi configurado. Fale com seu mentor.</div>'; return; }
-    MENTEE_CODE = s.code;
-    const subs = await fetchSubmissions(s.code);
-    renderApp(s.content, subs);
+    let token, code, fallbackContent=null, mentor=false;
+    if(isMentorMode()){ const m=mentorSession(); token=m.access_token; code=AS_CODE; mentor=true; }
+    else { const s = await validToken(); if(!s){ doLogout(); return; } token=s.access_token; code=s.code; fallbackContent=s.content||null; }
+    MENTEE_CODE = code;
+    let content = await fetchMenteeContent(code, token);
+    if(!content) content = fallbackContent;
+    if(!content){ document.getElementById("viewContainer").innerHTML = '<div class="loading">'+(mentor?'Conteúdo desta produtora não encontrado.':'Seu conteúdo ainda não foi configurado. Fale com seu mentor.')+'</div>'; return; }
+    const subs = await fetchSubmissions(code, token);
+    renderApp(content, subs);
+    mentorBanner(mentor, content);
   }catch(e){
+    if(String(e.message)==="expirada-mentor"){ document.getElementById("viewContainer").innerHTML = '<div class="loading">Sua sessão de mentor expirou. Volte ao Painel do Mentor, faça login e abra de novo.</div>'; return; }
     if(String(e.message).includes("expirada")){ doLogout(); return; }
     document.getElementById("viewContainer").innerHTML = '<div class="loading">Erro ao carregar: '+esc(e.message)+'</div>';
   }
+}
+function mentorBanner(on, content){
+  let bar=document.getElementById("mentorBar");
+  if(!on){ if(bar) bar.remove(); return; }
+  if(!bar){ bar=document.createElement("div"); bar.id="mentorBar"; document.body.prepend(bar); }
+  bar.innerHTML = '👁 Modo mentor — você está vendo o portal de <b>'+esc((content&&content.nome)||AS_CODE)+'</b>. As edições que você fizer valem para esta produtora. <a href="painel.html">← Voltar ao painel</a>';
 }
 function showApp(){ document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("appScreen").classList.remove("hidden"); loadAndRender(); }
 function showLogin(){ document.getElementById("appScreen").classList.add("hidden"); document.getElementById("loginScreen").classList.remove("hidden"); }
@@ -1051,7 +1081,7 @@ document.getElementById("password").addEventListener("keydown",e=>{ if(e.key==="
 document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
 document.getElementById("logoutBtn").addEventListener("click", doLogout);
 
-(async ()=>{ const s=await validToken(); if(s) showApp(); else showLogin(); })();
+(async ()=>{ if(isMentorMode()){ showApp(); return; } const s=await validToken(); if(s) showApp(); else showLogin(); })();
 </script>
 </body>
 </html>

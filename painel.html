@@ -461,7 +461,7 @@ function openModal(code){
     <div class="modal-hdr">
       <div><h2>${esc(g.nome||rmem.nome)}</h2>
       <div class="sub">${esc(rmem.quem||'')} · Código ${esc(g.code)} · Update ${mesLabel(g.latest.mes_ref)} · enviado ${timeAgo(g.latest.created_at)}</div></div>
-      <div style="display:flex;gap:8px;flex-shrink:0"><button class="btn-ghost" id="editBtn">✎ Editar números</button><button class="x" id="closeX">×</button></div>
+      <div style="display:flex;gap:8px;flex-shrink:0"><button class="btn-ghost" id="fullBtn">↗ Portal completo</button><button class="btn-ghost" id="editBtn">✎ Editar números</button><button class="x" id="closeX">×</button></div>
     </div>
 
     <div class="sect"><h3>1 · Financeiro — ${mesLabel(fin.mes)}</h3>
@@ -514,6 +514,7 @@ function openModal(code){
   document.body.style.overflow="hidden";
   document.getElementById("closeX").addEventListener("click", closeModal);
   document.getElementById("editBtn").addEventListener("click", ()=>openEditModal(code));
+  document.getElementById("fullBtn").addEventListener("click", ()=> window.open("aluno.html?as="+encodeURIComponent(code), "_blank"));
 
   if(histMeses.length>1 && typeof Chart!=="undefined"){
     const ctx=document.getElementById("histChart");
@@ -606,7 +607,7 @@ function openModalEmpty(code){
   document.getElementById("modal").innerHTML = `
     <div class="modal-hdr">
       <div><h2>${esc(rmem.nome||code)}</h2><div class="sub">${esc(rmem.quem||'')} · Código ${esc(code)} · ainda sem update</div></div>
-      <div style="display:flex;gap:8px;flex-shrink:0"><button class="btn-ghost" id="newBtn">＋ Lançar dados</button><button class="x" id="closeX">×</button></div>
+      <div style="display:flex;gap:8px;flex-shrink:0"><button class="btn-ghost" id="fullBtn">↗ Portal completo</button><button class="btn-ghost" id="newBtn">＋ Lançar dados</button><button class="x" id="closeX">×</button></div>
     </div>
     <div class="dim" style="font-size:13px;margin-top:6px">Esta produtora ainda não enviou nenhum update. Você pode lançar os números pela primeira vez em "＋ Lançar dados". Abaixo, a estratégia e o diagnóstico de redes dela.</div>
     ${strategicDiagHTML(code)}
@@ -615,6 +616,7 @@ function openModalEmpty(code){
   document.body.style.overflow = "hidden";
   document.getElementById("closeX").addEventListener("click", closeModal);
   document.getElementById("newBtn").addEventListener("click", ()=> openEditModal(code));
+  document.getElementById("fullBtn").addEventListener("click", ()=> window.open("aluno.html?as="+encodeURIComponent(code), "_blank"));
 }
 
 function openEditModal(code){
