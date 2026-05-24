@@ -211,6 +211,28 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
 .tf-item .tf-desc{font-size:14px;margin-bottom:9px;line-height:1.5}
 .tf-item .tf-desc .tp{font-size:10px;font-weight:700;color:var(--accent);margin-right:6px}
 .tf-row{display:grid;grid-template-columns:210px 1fr;gap:10px;align-items:start}
+/* OKR */
+.okr-top{margin-bottom:14px}
+.okr-obj{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.okr-obj-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.okr-onum{flex-shrink:0;font-size:11px;font-weight:800;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent);border-radius:6px;padding:4px 8px;letter-spacing:.04em}
+.okr-krhead{display:grid;grid-template-columns:1fr 110px 110px 130px 32px;gap:8px;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-weight:600;margin-bottom:5px;padding:0 2px}
+.okr-kr{display:grid;grid-template-columns:1fr 110px 110px 130px 32px;gap:8px;align-items:center;margin-bottom:8px}
+.okr-kr input,.okr-otitle,#okr_periodo{width:100%;padding:9px 11px;background:var(--surface-alt);border:1px solid var(--border-strong);border-radius:8px;font-size:13.5px;color:var(--text);font-family:inherit}
+.okr-kr input:focus,.okr-otitle:focus,#okr_periodo:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.okr-otitle{flex:1;font-weight:700}
+.kr-prog{display:flex;align-items:center;gap:6px}
+.kr-bar{flex:1;height:7px;background:var(--surface-alt);border-radius:6px;overflow:hidden}
+.kr-bar>span{display:block;height:100%;background:var(--green);transition:width .2s}
+.kr-pct{font-size:11px;color:var(--text-muted);min-width:34px;text-align:right}
+.okr-x{flex-shrink:0;width:30px;height:30px;border-radius:7px;background:transparent;border:1px solid var(--border-strong);color:var(--text-faint);font-size:16px;cursor:pointer;line-height:1}
+.okr-x:hover{border-color:var(--accent);color:var(--accent)}
+.okr-addkr,.okr-addobj{background:transparent;border:1px dashed var(--border-strong);color:var(--text-muted);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.okr-addkr:hover,.okr-addobj:hover{border-color:var(--accent);color:var(--text)}
+.okr-addobj{margin-bottom:16px}
+#okrSaveBtn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px 22px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit}
+#okrSaveBtn:hover{filter:brightness(1.08)} #okrSaveBtn:disabled{opacity:.5;cursor:default}
+@media(max-width:680px){.okr-krhead{display:none}.okr-kr{grid-template-columns:1fr 1fr 32px}.okr-kr .kr-prog{grid-column:1/-1}}
 .save-bar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 32%);padding:18px 0 6px;display:flex;align-items:center;gap:14px;margin-top:6px}
 .save-bar button{background:var(--ink);color:#fff;border:none;border-radius:9px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
 .save-bar button:hover{filter:brightness(1.08)} .save-bar button:disabled{opacity:.5;cursor:default}
@@ -678,7 +700,8 @@ function collectForm(){
     comercial:{ leads:g("c_leads"), reunioes:g("c_reun"), propostas:g("c_prop"), fechados:g("c_fech"), valorFechado:gm("c_vf"), pipeline:gm("c_pipe"), mrr:gm("c_mrr"), canal:g("c_canal"), prospec:g("c_prospec"), obs:g("c_obs") },
     concentracao:{ maiorCliente:g("c_maior"), top3:g("c_top3") },
     mudancas:{ contratacoes:g("m_contr"), saidas:g("m_saidas"), processo:g("m_proc"), cliente:g("m_cli"), gargalo:g("m_garg"), livre:g("m_livre") },
-    tarefas, mesAtivo:ref };
+    tarefas, mesAtivo:ref,
+    okr:(CURRENT&&CURRENT.subs[0]&&CURRENT.subs[0].data&&CURRENT.subs[0].data.okr)||undefined };
   return { ref, data };
 }
 async function insertSubmission(payload){
@@ -703,7 +726,7 @@ async function saveUpdate(){
 
 // ===== RENDER =====
 let VIEWS={}, CURRENT=null, MENTEE_CODE=null, _lastView="visao";
-let _fin=null, _mat=null, _matStage=null, _series=null;
+let _fin=null, _mat=null, _matStage=null, _series=null, _okr=null;
 function diagBlockHTML(content){
   const d = content.diag;
   if(!d) return "";
@@ -765,6 +788,8 @@ function viewsHTML(content, subs){
     metas = `<div class="empty-fin">Você ainda não enviou nenhum update.<br>
       Preencha seu primeiro mês em <a href="#" data-goto="atualizar">Atualizar meus dados</a> e clique em "Salvar atualização" — seu faturamento vs. meta aparece aqui automaticamente.</div>`;
   }
+  _okr = normalizeOkr( (subs[0] && subs[0].data && subs[0].data.okr) || null );
+  metas += okrSectionHTML();
 
   // ALAVANCAS
   let alav = (content.alavancas&&content.alavancas.length)
@@ -899,6 +924,75 @@ function viewsHTML(content, subs){
   return { visao, atualizar, kpis, metas, evolucao, alavancas:alav, comercial, plano, aprendizado, direcao, materiais };
 }
 
+// ===== OKR (Metas & faturamento) =====
+function currentQuarter(){ const d=new Date(); return "Q"+(Math.floor(d.getMonth()/3)+1)+" "+d.getFullYear(); }
+function quarterOptions(sel){ const y=new Date().getFullYear(); let out=""; let found=false;
+  for(let yy=y; yy<=y+1; yy++){ for(let q=1;q<=4;q++){ const val="Q"+q+" "+yy; if(val===sel) found=true; out+=`<option value="${val}" ${val===sel?"selected":""}>${val}</option>`; } }
+  if(sel && !found) out = `<option value="${esc(sel)}" selected>${esc(sel)}</option>`+out; return out; }
+function krNum(s){ if(s==null||s==="") return NaN; return parseFloat(String(s).replace(/[^\d,.-]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(",",".")); }
+function krPct(meta,atual){ const m=krNum(meta), a=krNum(atual); if(isNaN(m)||m===0||isNaN(a)) return null; return Math.round(a/m*100); }
+function normalizeOkr(okr){
+  if(okr && Array.isArray(okr.objetivos) && okr.objetivos.length){
+    return { periodo: okr.periodo||currentQuarter(), objetivos: okr.objetivos.map(o=>({ objetivo:o.objetivo||"", krs:(Array.isArray(o.krs)&&o.krs.length?o.krs:[{desc:"",meta:"",atual:""}]).map(k=>({desc:k.desc||"",meta:(k.meta==null?"":k.meta),atual:(k.atual==null?"":k.atual)})) })) };
+  }
+  const objs=[]; for(let i=0;i<5;i++){ const krs=[]; for(let j=0;j<4;j++) krs.push({desc:"",meta:"",atual:""}); objs.push({objetivo:"",krs:krs}); }
+  return { periodo: currentQuarter(), objetivos: objs };
+}
+function okrKrHTML(oi,ki,k){ const pct=krPct(k.meta,k.atual); const w=pct==null?0:Math.max(0,Math.min(100,pct));
+  return `<div class="okr-kr" data-oi="${oi}" data-ki="${ki}">
+    <input class="okr-f kr-desc" data-oi="${oi}" data-ki="${ki}" data-f="desc" placeholder="Resultado-chave mensurável" value="${esc(k.desc||"")}">
+    <input class="okr-f kr-meta" data-oi="${oi}" data-ki="${ki}" data-f="meta" placeholder="Meta" value="${esc(k.meta==null?"":k.meta)}">
+    <input class="okr-f kr-atual" data-oi="${oi}" data-ki="${ki}" data-f="atual" placeholder="Atual" value="${esc(k.atual==null?"":k.atual)}">
+    <div class="kr-prog"><div class="kr-bar"><span style="width:${w}%"></span></div><span class="kr-pct">${pct==null?"—":pct+"%"}</span></div>
+    <button class="okr-x" data-okr="delkr" data-oi="${oi}" data-ki="${ki}" title="Remover resultado-chave">×</button></div>`; }
+function okrObjHTML(oi,o){
+  return `<div class="okr-obj" data-oi="${oi}">
+    <div class="okr-obj-hd"><span class="okr-onum">O${oi+1}</span>
+      <input class="okr-f okr-otitle" data-oi="${oi}" data-f="objetivo" placeholder="Objetivo: aonde queremos chegar neste trimestre?" value="${esc(o.objetivo||"")}">
+      <button class="okr-x" data-okr="delobj" data-oi="${oi}" title="Remover objetivo">×</button></div>
+    <div class="okr-krhead"><span>Resultado-chave</span><span>Meta</span><span>Atual</span><span>Progresso</span><span></span></div>
+    <div class="okr-krs">${o.krs.map((k,ki)=>okrKrHTML(oi,ki,k)).join("")}</div>
+    <button class="okr-addkr" data-okr="addkr" data-oi="${oi}">+ Resultado-chave</button></div>`; }
+function renderOkrObjs(){ const box=document.getElementById("okrObjs"); if(!box||!_okr) return; box.innerHTML=_okr.objetivos.map((o,oi)=>okrObjHTML(oi,o)).join(""); }
+function okrSectionHTML(){
+  return `<div class="block-title" style="margin-top:26px">OKR do trimestre</div>
+    <div class="note" style="margin:0 0 12px">Defina seus objetivos e os resultados-chave (mensuráveis) do trimestre. O % preenche sozinho conforme você informa Meta e Atual. Pode adicionar quantos objetivos e resultados quiser. Clique em "Salvar OKR" ao terminar.</div>
+    <div class="okr-top"><div class="fld" style="max-width:220px"><label>Trimestre</label><select id="okr_periodo">${quarterOptions((_okr&&_okr.periodo)||currentQuarter())}</select></div></div>
+    <div id="okrObjs"></div>
+    <button class="okr-addobj" data-okr="addobj">+ Adicionar objetivo</button>
+    <div class="save-bar"><button id="okrSaveBtn" data-okr="save">Salvar OKR</button><span id="okrMsg" class="save-msg"></span></div>`;
+}
+async function saveOkr(){
+  const msg=document.getElementById("okrMsg"), btn=document.getElementById("okrSaveBtn"); if(!_okr) return;
+  const clean={ periodo:_okr.periodo||currentQuarter(), objetivos:_okr.objetivos
+    .map(o=>({ objetivo:o.objetivo||"", krs:o.krs.filter(k=>(k.desc&&k.desc.trim())||k.meta!==""||k.atual!=="") }))
+    .filter(o=>(o.objetivo&&o.objetivo.trim())||o.krs.length) };
+  if(!clean.objetivos.length){ if(msg){msg.textContent="Preencha ao menos um objetivo antes de salvar.";msg.className="save-msg err";} return; }
+  const base=(CURRENT&&CURRENT.subs[0]&&CURRENT.subs[0].data)? JSON.parse(JSON.stringify(CURRENT.subs[0].data)) : {};
+  base.okr=clean;
+  const ref=(CURRENT&&CURRENT.subs[0]&&CURRENT.subs[0].mes_ref)||currentYM();
+  if(msg) msg.textContent=""; if(btn){btn.disabled=true;btn.textContent="Salvando...";}
+  try{
+    await insertSubmission({ mentee_code:MENTEE_CODE, mentee_name:(CURRENT&&CURRENT.content&&CURRENT.content.nome)||"", mes_ref:ref, data:base });
+    if(msg){msg.textContent="OKR salvo! Histórico preservado.";msg.className="save-msg ok";}
+    await loadAndRender(); showView("metas");
+  }catch(e){ if(msg){msg.textContent="Erro ao salvar: "+e.message;msg.className="save-msg err";} if(btn){btn.disabled=false;btn.textContent="Salvar OKR";} }
+}
+(function(){ const vc=document.getElementById("viewContainer"); if(!vc) return;
+  vc.addEventListener("input", e=>{ const t=e.target; if(!t||!_okr) return;
+    if(t.id==="okr_periodo"){ _okr.periodo=t.value; return; }
+    if(t.classList&&t.classList.contains("okr-f")){ const oi=+t.dataset.oi, f=t.dataset.f; const o=_okr.objetivos[oi]; if(!o) return;
+      if(f==="objetivo"){ o.objetivo=t.value; }
+      else { const ki=+t.dataset.ki, k=o.krs[ki]; if(k){ k[f]=t.value; if(f==="meta"||f==="atual"){ const row=t.closest(".okr-kr"); const pct=krPct(k.meta,k.atual); const bar=row&&row.querySelector(".kr-bar>span"); const lbl=row&&row.querySelector(".kr-pct"); if(bar) bar.style.width=(pct==null?0:Math.max(0,Math.min(100,pct)))+"%"; if(lbl) lbl.textContent=(pct==null?"—":pct+"%"); } } } } });
+  vc.addEventListener("change", e=>{ if(e.target&&e.target.id==="okr_periodo"&&_okr) _okr.periodo=e.target.value; });
+  vc.addEventListener("click", e=>{ const b=e.target.closest("[data-okr]"); if(!b||!_okr) return; const act=b.dataset.okr; const oi=b.dataset.oi!=null?+b.dataset.oi:null;
+    if(act==="addobj"){ _okr.objetivos.push({objetivo:"",krs:[{desc:"",meta:"",atual:""}]}); renderOkrObjs(); }
+    else if(act==="addkr"){ if(_okr.objetivos[oi]) _okr.objetivos[oi].krs.push({desc:"",meta:"",atual:""}); renderOkrObjs(); }
+    else if(act==="delobj"){ _okr.objetivos.splice(oi,1); renderOkrObjs(); }
+    else if(act==="delkr"){ const ki=+b.dataset.ki; if(_okr.objetivos[oi]) _okr.objetivos[oi].krs.splice(ki,1); renderOkrObjs(); }
+    else if(act==="save"){ saveOkr(); } });
+})();
+
 function showView(name){
   _lastView = name;
   const [title, sub] = VIEW_TITLE[name] || [name,""];
@@ -907,7 +1001,7 @@ function showView(name){
      <div class="view active">${VIEWS[name]||""}</div>`;
   document.querySelectorAll("#sideNav button").forEach(b=> b.classList.toggle("active", b.dataset.view===name));
   destroyAllCharts();
-  if(name==="metas") buildMetasChart();
+  if(name==="metas"){ buildMetasChart(); renderOkrObjs(); }
   else if(name==="visao") buildVisaoCharts();
   else if(name==="evolucao") buildEvolucaoCharts();
   window.scrollTo({top:0});
