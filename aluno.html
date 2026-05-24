@@ -248,7 +248,10 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
 .ce-row{display:grid;grid-template-columns:1fr 34px;gap:8px;margin-bottom:8px;align-items:center}
 .ce-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
 .ce-cardhd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.ce-row input,.ce-card input,.ce-card textarea,.ce-card select{width:100%;padding:9px 11px;background:var(--surface-alt);border:1px solid var(--border-strong);border-radius:8px;font-size:13.5px;color:var(--text);font-family:inherit}
+.ce-row input,.ce-row textarea,.ce-card input,.ce-card textarea,.ce-card select{width:100%;padding:9px 11px;background:var(--surface-alt);border:1px solid var(--border-strong);border-radius:8px;font-size:13.5px;color:var(--text);font-family:inherit}
+.ce-row textarea{min-height:76px;resize:vertical;line-height:1.45}
+.ce-row:has(textarea){align-items:start}
+.ce-row:has(textarea) .okr-x{margin-top:4px}
 .ce-card textarea{min-height:58px;resize:vertical;margin-bottom:6px}
 .ce-card input{margin-bottom:6px}
 .ce-cardhd select{width:auto;min-width:120px}
@@ -1058,13 +1061,16 @@ async function saveOkr(){
 
 // ===== EDITOR DE CONTEÚDO (modo mentor) =====
 function ceList(path){ if(path.slice(0,5)==="diag."){ _ce.diag=_ce.diag||{}; const k=path.slice(5); _ce.diag[k]=_ce.diag[k]||[]; return _ce.diag[k]; } _ce[path]=_ce[path]||[]; return _ce[path]; }
-function renderStrList(id, path){ const box=document.getElementById(id); if(!box) return; const arr=ceList(path);
-  box.innerHTML = arr.map((v,i)=>`<div class="ce-row"><input class="ce-f" data-ce="slist" data-list="${path}" data-i="${i}" value="${esc(v||"")}"><button class="okr-x" data-ce="del" data-list="${path}" data-i="${i}" title="Remover">×</button></div>`).join("") || '<div class="mat-note">Nada ainda — clique em adicionar.</div>'; }
+function renderStrList(id, path, multiline){ const box=document.getElementById(id); if(!box) return; const arr=ceList(path);
+  box.innerHTML = arr.map((v,i)=> multiline
+    ? `<div class="ce-row"><textarea class="ce-f" data-ce="slist" data-list="${path}" data-i="${i}" rows="3">${esc(v||"")}</textarea><button class="okr-x" data-ce="del" data-list="${path}" data-i="${i}" title="Remover">×</button></div>`
+    : `<div class="ce-row"><input class="ce-f" data-ce="slist" data-list="${path}" data-i="${i}" value="${esc(v||"")}"><button class="okr-x" data-ce="del" data-list="${path}" data-i="${i}" title="Remover">×</button></div>`
+  ).join("") || '<div class="mat-note">Nada ainda — clique em adicionar.</div>'; }
 function renderAlav(){ const box=document.getElementById("ce_al"); if(!box) return; const arr=_ce.alavancas||[];
   box.innerHTML = arr.map((a,i)=>`<div class="ce-card"><div class="ce-cardhd"><span class="okr-onum">A${i+1}</span><button class="okr-x" data-ce="del" data-list="alavancas" data-i="${i}" title="Remover">×</button></div><input class="ce-f" data-ce="alav" data-i="${i}" data-f="titulo" placeholder="Título da alavanca" value="${esc(a.titulo||"")}"><textarea class="ce-f" data-ce="alav" data-i="${i}" data-f="mecanismo" placeholder="Mecanismo (como funciona)">${esc(a.mecanismo||"")}</textarea><input class="ce-f" data-ce="alav" data-i="${i}" data-f="impacto" placeholder="Impacto (ex.: +R$ 100k/ano)" value="${esc(a.impacto||"")}"></div>`).join("") || '<div class="mat-note">Nenhuma alavanca — clique em adicionar.</div>'; }
 function renderPlano(){ const box=document.getElementById("ce_pl"); if(!box) return; const arr=_ce.plano||[];
   box.innerHTML = arr.map((p,i)=>`<div class="ce-card"><div class="ce-cardhd"><select class="ce-f" data-ce="plano" data-i="${i}" data-f="prioridade">${["maxima","alta","media"].map(o=>`<option value="${o}" ${p.prioridade===o?"selected":""}>${PRIO_LBL[o]}</option>`).join("")}</select><select class="ce-f" data-ce="plano" data-i="${i}" data-f="status">${["","pendente","em_andamento","concluida","atrasada","cancelada"].map(o=>`<option value="${o}" ${(p.status||"")===o?"selected":""}>${o===""?"— status —":STATUS_LBL[o]}</option>`).join("")}</select><button class="okr-x" data-ce="del" data-list="plano" data-i="${i}" title="Remover">×</button></div><input class="ce-f" data-ce="plano" data-i="${i}" data-f="descricao" placeholder="Descrição da tarefa" value="${esc(p.descricao||"")}"><input class="ce-f" data-ce="plano" data-i="${i}" data-f="prazo" placeholder="Prazo (ex.: 30 dias)" value="${esc(p.prazo||"")}"></div>`).join("") || '<div class="mat-note">Nenhuma tarefa — clique em adicionar.</div>'; }
-function renderAllCE(){ renderStrList("ce_op","oportunidades"); renderAlav(); renderPlano(); renderStrList("ce_dr","diag.redes"); renderStrList("ce_dc","diag.cruzamento"); renderStrList("ce_dg","diag.ganhos"); renderStrList("ce_drf","diag.reflexao"); renderDocs(); }
+function renderAllCE(){ renderStrList("ce_op","oportunidades"); renderAlav(); renderPlano(); renderStrList("ce_dr","diag.redes",true); renderStrList("ce_dc","diag.cruzamento",true); renderStrList("ce_dg","diag.ganhos",true); renderStrList("ce_drf","diag.reflexao",true); renderDocs(); }
 function renderDocs(){ const box=document.getElementById("ce_docs"); if(!box) return; const arr=_ce.materiais||[];
   box.innerHTML = arr.map((m,i)=>`<div class="ce-doc"><span>📄</span><span class="dn">${esc(m.titulo||m.path||m.url||"")}${m.path?'':' <span class="dim" style="font-size:11px">(link externo)</span>'}</span><button class="okr-x" data-ce="deldoc" data-i="${i}" title="Remover da lista">×</button></div>`).join("") || '<div class="mat-note">Nenhum documento ainda.</div>'; }
 async function uploadDoc(){
@@ -1090,7 +1096,7 @@ async function openDoc(path){
     const j=await r.json(); const su=j.signedURL||j.signedUrl; if(!su){ alert("Link não gerado."); return; } window.open(SUPABASE_URL+"/storage/v1"+su,"_blank");
   }catch(e){ alert("Erro ao abrir: "+e.message); }
 }
-function reRenderCE(list){ if(list==="oportunidades")renderStrList("ce_op",list); else if(list==="alavancas")renderAlav(); else if(list==="plano")renderPlano(); else if(list==="diag.redes")renderStrList("ce_dr",list); else if(list==="diag.cruzamento")renderStrList("ce_dc",list); else if(list==="diag.ganhos")renderStrList("ce_dg",list); else if(list==="diag.reflexao")renderStrList("ce_drf",list); }
+function reRenderCE(list){ if(list==="oportunidades")renderStrList("ce_op",list); else if(list==="alavancas")renderAlav(); else if(list==="plano")renderPlano(); else if(list==="diag.redes")renderStrList("ce_dr",list,true); else if(list==="diag.cruzamento")renderStrList("ce_dc",list,true); else if(list==="diag.ganhos")renderStrList("ce_dg",list,true); else if(list==="diag.reflexao")renderStrList("ce_drf",list,true); }
 function buildContentEditor(){
   const c=_ce||{}; const mat=c.maturidade||{}; const dg=c.diag||{};
   const moms=[["sobrevivencia","Sobrevivência"],["estruturacao","Estruturação"],["crescimento","Crescimento"],["escala","Escala"]];
