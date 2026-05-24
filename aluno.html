@@ -448,6 +448,23 @@ const AS_CODE = (function(){ try{ return new URLSearchParams(location.search).ge
 const MENTOR_EMAIL = "caiobocuti@catalunyafilmes.com";
 function mentorSession(){ try{ const m=JSON.parse(localStorage.getItem("mentor-session")||"null"); if(m && m.email===MENTOR_EMAIL && m.access_token) return m; }catch(e){} return null; }
 function isMentorMode(){ return !!(AS_CODE && mentorSession()); }
+async function mentorRefresh(m){
+  try{
+    const r = await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=refresh_token", {
+      method:"POST", headers:{ "apikey":SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+      body: JSON.stringify({ refresh_token:m.refresh_token }) });
+    if(!r.ok) return null;
+    const j = await r.json();
+    const sess = { email:m.email, access_token:j.access_token, refresh_token:j.refresh_token||m.refresh_token, expires_at: Date.now()+(j.expires_in||3600)*1000 };
+    try{ localStorage.setItem("mentor-session", JSON.stringify(sess)); }catch(e){}
+    return sess;
+  }catch(e){ return null; }
+}
+async function mentorValidToken(){
+  let m = mentorSession(); if(!m) return null;
+  if(Date.now() > (m.expires_at||0) - 60000){ m = m.refresh_token ? await mentorRefresh(m) : null; }
+  return m;
+}
 
 // ===== DATA =====
 async function fetchMenteeContent(code, token){
@@ -1040,7 +1057,7 @@ async function loadAndRender(){
   document.getElementById("viewContainer").innerHTML = '<div class="loading">Carregando seus dados...</div>';
   try{
     let token, code, fallbackContent=null, mentor=false;
-    if(isMentorMode()){ const m=mentorSession(); token=m.access_token; code=AS_CODE; mentor=true; }
+    if(isMentorMode()){ const m=await mentorValidToken(); if(!m){ document.getElementById("viewContainer").innerHTML='<div class="loading">Sua sessão de mentor expirou. Volte ao Painel do Mentor, faça login e abra de novo.</div>'; return; } token=m.access_token; code=AS_CODE; mentor=true; }
     else { const s = await validToken(); if(!s){ doLogout(); return; } token=s.access_token; code=s.code; fallbackContent=s.content||null; }
     MENTEE_CODE = code;
     let content = await fetchMenteeContent(code, token);
