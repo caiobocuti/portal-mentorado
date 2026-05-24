@@ -138,9 +138,17 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
 
 .direcao{font-size:15px;line-height:1.75;color:var(--text);background:var(--surface);
   border-radius:12px;padding:20px;border:1px solid var(--border);border-left:3px solid var(--accent)}
-.materiais a.mat-link{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);
-  border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--text);font-size:14.5px;font-weight:600;margin-bottom:9px}
-.materiais a.mat-link:hover{border-color:var(--accent)}
+.materiais .mat-link{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--text);font-size:14.5px;font-weight:600;margin-bottom:9px;font-family:inherit}
+.materiais .mat-link:hover{border-color:var(--accent)}
+.ce-doc{display:flex;align-items:center;gap:10px;background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-bottom:8px;font-size:13px}
+.ce-doc .dn{flex:1}
+.ce-up{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin-top:10px}
+.ce-up input[type=file]{font-size:12.5px;color:var(--text-muted)}
+.ce-up #ce_uptitulo{padding:9px 11px;background:var(--surface-alt);border:1px solid var(--border-strong);border-radius:8px;font-size:13.5px;color:var(--text);font-family:inherit}
+#ce_upbtn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+#ce_upbtn:disabled{opacity:.5;cursor:default}
+@media(max-width:680px){.ce-up{grid-template-columns:1fr}}
 .materiais .none{color:var(--text-faint);font-size:14px;background:var(--surface);border:1px dashed var(--border-strong);
   border-radius:12px;padding:24px;text-align:center;line-height:1.6}
 .loading{text-align:center;padding:80px 0;color:var(--text-muted);font-size:14px}
@@ -775,7 +783,7 @@ async function saveUpdate(){
 
 // ===== RENDER =====
 let VIEWS={}, CURRENT=null, MENTEE_CODE=null, _lastView="visao";
-let _fin=null, _mat=null, _matStage=null, _series=null, _okr=null, _ce=null;
+let _fin=null, _mat=null, _matStage=null, _series=null, _okr=null, _ce=null, _authToken=null;
 function diagBlockHTML(content){
   const d = content.diag;
   if(!d) return "";
@@ -874,7 +882,9 @@ function viewsHTML(content, subs){
 
   // MATERIAIS
   let materiais = (content.materiais&&content.materiais.length)
-    ? '<div class="materiais">'+content.materiais.map(m=>`<a class="mat-link" href="${esc(m.url)}" target="_blank">📄 ${esc(m.titulo)}</a>`).join('')+'</div>'
+    ? '<div class="materiais">'+content.materiais.map(m=> m && m.path
+        ? `<button class="mat-link" data-doc="${esc(m.path)}">📄 ${esc(m.titulo||m.path)}</button>`
+        : `<a class="mat-link" href="${esc(m.url)}" target="_blank">📄 ${esc(m.titulo||m.url)}</a>`).join('')+'</div>'
     : '<div class="materiais"><div class="none">Seu mentor ainda não anexou documentos aqui.<br>Em breve: rate card, deck institucional e materiais da sua produtora.</div></div>';
 
   // ===== KPIs (núcleo essencial, com farol e leitura) =====
@@ -1050,7 +1060,32 @@ function renderAlav(){ const box=document.getElementById("ce_al"); if(!box) retu
   box.innerHTML = arr.map((a,i)=>`<div class="ce-card"><div class="ce-cardhd"><span class="okr-onum">A${i+1}</span><button class="okr-x" data-ce="del" data-list="alavancas" data-i="${i}" title="Remover">×</button></div><input class="ce-f" data-ce="alav" data-i="${i}" data-f="titulo" placeholder="Título da alavanca" value="${esc(a.titulo||"")}"><textarea class="ce-f" data-ce="alav" data-i="${i}" data-f="mecanismo" placeholder="Mecanismo (como funciona)">${esc(a.mecanismo||"")}</textarea><input class="ce-f" data-ce="alav" data-i="${i}" data-f="impacto" placeholder="Impacto (ex.: +R$ 100k/ano)" value="${esc(a.impacto||"")}"></div>`).join("") || '<div class="mat-note">Nenhuma alavanca — clique em adicionar.</div>'; }
 function renderPlano(){ const box=document.getElementById("ce_pl"); if(!box) return; const arr=_ce.plano||[];
   box.innerHTML = arr.map((p,i)=>`<div class="ce-card"><div class="ce-cardhd"><select class="ce-f" data-ce="plano" data-i="${i}" data-f="prioridade">${["maxima","alta","media"].map(o=>`<option value="${o}" ${p.prioridade===o?"selected":""}>${PRIO_LBL[o]}</option>`).join("")}</select><select class="ce-f" data-ce="plano" data-i="${i}" data-f="status">${["","pendente","em_andamento","concluida","atrasada","cancelada"].map(o=>`<option value="${o}" ${(p.status||"")===o?"selected":""}>${o===""?"— status —":STATUS_LBL[o]}</option>`).join("")}</select><button class="okr-x" data-ce="del" data-list="plano" data-i="${i}" title="Remover">×</button></div><input class="ce-f" data-ce="plano" data-i="${i}" data-f="descricao" placeholder="Descrição da tarefa" value="${esc(p.descricao||"")}"><input class="ce-f" data-ce="plano" data-i="${i}" data-f="prazo" placeholder="Prazo (ex.: 30 dias)" value="${esc(p.prazo||"")}"></div>`).join("") || '<div class="mat-note">Nenhuma tarefa — clique em adicionar.</div>'; }
-function renderAllCE(){ renderStrList("ce_op","oportunidades"); renderAlav(); renderPlano(); renderStrList("ce_dr","diag.redes"); renderStrList("ce_dc","diag.cruzamento"); renderStrList("ce_dg","diag.ganhos"); renderStrList("ce_drf","diag.reflexao"); }
+function renderAllCE(){ renderStrList("ce_op","oportunidades"); renderAlav(); renderPlano(); renderStrList("ce_dr","diag.redes"); renderStrList("ce_dc","diag.cruzamento"); renderStrList("ce_dg","diag.ganhos"); renderStrList("ce_drf","diag.reflexao"); renderDocs(); }
+function renderDocs(){ const box=document.getElementById("ce_docs"); if(!box) return; const arr=_ce.materiais||[];
+  box.innerHTML = arr.map((m,i)=>`<div class="ce-doc"><span>📄</span><span class="dn">${esc(m.titulo||m.path||m.url||"")}${m.path?'':' <span class="dim" style="font-size:11px">(link externo)</span>'}</span><button class="okr-x" data-ce="deldoc" data-i="${i}" title="Remover da lista">×</button></div>`).join("") || '<div class="mat-note">Nenhum documento ainda.</div>'; }
+async function uploadDoc(){
+  const fileEl=document.getElementById("ce_upfile"), titEl=document.getElementById("ce_uptitulo"), msg=document.getElementById("ce_upmsg"), btn=document.getElementById("ce_upbtn");
+  const f=fileEl&&fileEl.files&&fileEl.files[0]; if(!f){ if(msg){msg.textContent="Escolha um arquivo.";msg.className="save-msg err";} return; }
+  const m=await mentorValidToken(); if(!m){ if(msg){msg.textContent="Sua sessão de mentor expirou. Volte ao painel.";msg.className="save-msg err";} return; }
+  const safe=f.name.replace(/[^\w.\-]+/g,"_"); const path=MENTEE_CODE+"/"+Date.now()+"-"+safe;
+  if(msg){msg.textContent="Enviando...";msg.className="save-msg";} if(btn)btn.disabled=true;
+  try{
+    const r=await fetch(SUPABASE_URL+"/storage/v1/object/documentos/"+encodeURI(path),{method:"POST",headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+m.access_token,"Content-Type":f.type||"application/octet-stream","x-upsert":"true"},body:f});
+    if(!r.ok){ const t=await r.text(); throw new Error("HTTP "+r.status+" "+t.slice(0,120)); }
+    _ce.materiais=_ce.materiais||[]; _ce.materiais.push({titulo:(titEl&&titEl.value.trim())||f.name, path:path});
+    renderDocs(); if(fileEl)fileEl.value=""; if(titEl)titEl.value="";
+    if(msg){msg.textContent='Arquivo enviado. Clique em "Salvar conteúdo" para confirmar na lista.';msg.className="save-msg ok";}
+  }catch(e){ if(msg){msg.textContent="Erro: "+e.message;msg.className="save-msg err";} }
+  finally{ if(btn)btn.disabled=false; }
+}
+async function openDoc(path){
+  if(!_authToken){ alert("Sessão não encontrada — recarregue a página."); return; }
+  try{
+    const r=await fetch(SUPABASE_URL+"/storage/v1/object/sign/documentos/"+encodeURI(path),{method:"POST",headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+_authToken,"Content-Type":"application/json"},body:JSON.stringify({expiresIn:3600})});
+    if(!r.ok){ alert("Não foi possível abrir o documento ("+r.status+")."); return; }
+    const j=await r.json(); const su=j.signedURL||j.signedUrl; if(!su){ alert("Link não gerado."); return; } window.open(SUPABASE_URL+"/storage/v1"+su,"_blank");
+  }catch(e){ alert("Erro ao abrir: "+e.message); }
+}
 function reRenderCE(list){ if(list==="oportunidades")renderStrList("ce_op",list); else if(list==="alavancas")renderAlav(); else if(list==="plano")renderPlano(); else if(list==="diag.redes")renderStrList("ce_dr",list); else if(list==="diag.cruzamento")renderStrList("ce_dc",list); else if(list==="diag.ganhos")renderStrList("ce_dg",list); else if(list==="diag.reflexao")renderStrList("ce_drf",list); }
 function buildContentEditor(){
   const c=_ce||{}; const mat=c.maturidade||{}; const dg=c.diag||{};
@@ -1078,6 +1113,10 @@ function buildContentEditor(){
     <div class="block-title">Ganhos rápidos</div><div id="ce_dg"></div><button class="okr-addobj" data-ce="add" data-list="diag.ganhos">+ Adicionar item</button>
     <div class="block-title">Para refletir</div><div id="ce_drf"></div><button class="okr-addobj" data-ce="add" data-list="diag.reflexao">+ Adicionar pergunta</button>
   </div>
+  <div class="form-sec"><h3>Documentos</h3><div class="desc">Suba arquivos (PDF, deck, rate card…) que ficam na aba Documentos desta produtora. Só ela vê os dela.</div>
+    <div id="ce_docs"></div>
+    <div class="ce-up"><input type="file" id="ce_upfile"><input id="ce_uptitulo" placeholder="Título (opcional)"><button id="ce_upbtn" data-ce="upload">Enviar arquivo</button></div>
+    <span id="ce_upmsg" class="save-msg"></span></div>
   <div class="save-bar"><button id="ceSaveBtn" data-ce="save">Salvar conteúdo</button><span id="ceMsg" class="save-msg"></span></div>`;
 }
 async function saveContent(){
@@ -1111,6 +1150,8 @@ async function saveContent(){
   vc.addEventListener("click", e=>{ const b=e.target.closest("[data-ce]"); if(!b||!_ce) return; const a=b.dataset.ce;
     if(a==="add"){ const list=b.dataset.list, arr=ceList(list); if(list==="alavancas")arr.push({titulo:"",mecanismo:"",impacto:""}); else if(list==="plano")arr.push({prioridade:"alta",descricao:"",prazo:"",status:""}); else arr.push(""); reRenderCE(list); }
     else if(a==="del"){ const list=b.dataset.list, arr=ceList(list); arr.splice(+b.dataset.i,1); reRenderCE(list); }
+    else if(a==="upload"){ uploadDoc(); }
+    else if(a==="deldoc"){ _ce.materiais=_ce.materiais||[]; _ce.materiais.splice(+b.dataset.i,1); renderDocs(); }
     else if(a==="save"){ saveContent(); } });
 })();
 
@@ -1148,7 +1189,7 @@ async function loadAndRender(){
     let token, code, fallbackContent=null, mentor=false;
     if(isMentorMode()){ const m=await mentorValidToken(); if(!m){ document.getElementById("viewContainer").innerHTML='<div class="loading">Sua sessão de mentor expirou. Volte ao Painel do Mentor, faça login e abra de novo.</div>'; return; } token=m.access_token; code=AS_CODE; mentor=true; }
     else { const s = await validToken(); if(!s){ doLogout(); return; } token=s.access_token; code=s.code; fallbackContent=s.content||null; }
-    MENTEE_CODE = code;
+    MENTEE_CODE = code; _authToken = token;
     let content = await fetchMenteeContent(code, token);
     if(!content) content = fallbackContent;
     if(!content){ document.getElementById("viewContainer").innerHTML = '<div class="loading">'+(mentor?'Conteúdo desta produtora não encontrado.':'Seu conteúdo ainda não foi configurado. Fale com seu mentor.')+'</div>'; return; }
@@ -1174,6 +1215,7 @@ function doLogout(){ clearSession(); showLogin(); }
 document.getElementById("sideNav").addEventListener("click", e=>{ const b=e.target.closest("button[data-view]"); if(b) showView(b.dataset.view); });
 document.getElementById("viewContainer").addEventListener("click", e=>{ const g=e.target.closest("[data-goto]"); if(g){ e.preventDefault(); showView(g.dataset.goto); } });
 document.getElementById("viewContainer").addEventListener("input", e=>{ const t=e.target; if(t&&t.classList&&t.classList.contains("money")){ t.value=moneyMask(t.value); } });
+document.getElementById("viewContainer").addEventListener("click", e=>{ const d=e.target.closest("[data-doc]"); if(d){ e.preventDefault(); openDoc(d.dataset.doc); } });
 document.getElementById("loginBtn").addEventListener("click", async ()=>{
   const btn=document.getElementById("loginBtn"), err=document.getElementById("loginErr");
   const email=document.getElementById("email").value.trim(), pwd=document.getElementById("password").value;
