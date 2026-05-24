@@ -193,6 +193,51 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
   .main{padding:22px 18px 60px}
   .kpis{grid-template-columns:1fr 1fr}.mat-grid{grid-template-columns:1fr}.comgrid{grid-template-columns:1fr 1fr}
 }
+
+/* ===== FORM (atualizar) ===== */
+.form-sec{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.form-sec h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-weight:700;margin-bottom:4px}
+.form-sec .desc{font-size:12.5px;color:var(--text-muted);margin-bottom:14px}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 14px}
+.fgrid.two{grid-template-columns:repeat(2,1fr)}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);font-weight:600}
+.fld input,.fld select,.fld textarea{background:var(--surface-alt);border:1px solid var(--border-strong);border-radius:8px;
+  padding:10px 12px;font-size:14px;color:var(--text);font-family:inherit;width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:var(--ink)}
+.fld.full{grid-column:1/-1}
+.fld textarea{min-height:58px;resize:vertical}
+.tf-item{background:var(--surface-alt);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:9px}
+.tf-item .tf-desc{font-size:14px;margin-bottom:9px;line-height:1.5}
+.tf-item .tf-desc .tp{font-size:10px;font-weight:700;color:var(--accent);margin-right:6px}
+.tf-row{display:grid;grid-template-columns:210px 1fr;gap:10px;align-items:start}
+.save-bar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 32%);padding:18px 0 6px;display:flex;align-items:center;gap:14px;margin-top:6px}
+.save-bar button{background:var(--ink);color:#fff;border:none;border-radius:9px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.save-bar button:hover{filter:brightness(1.08)} .save-bar button:disabled{opacity:.5;cursor:default}
+.save-msg{font-size:13px}.save-msg.ok{color:var(--green)}.save-msg.err{color:var(--accent)}
+.histtable{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:12px}
+.histtable th,.histtable td{border:1px solid var(--border);padding:6px 9px;text-align:right}
+.histtable th:first-child,.histtable td:first-child{text-align:left}
+.histtable th{color:var(--text-faint);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.04em}
+
+/* dashboard (visao) */
+.dash-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.full-chart{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.full-chart .mct{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.cnv-lg{height:300px}
+.minicharts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.mc .mct{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.mc .cnv{height:175px}
+
+/* radar */
+.radar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;height:360px}
+.mat-note{font-size:12px;color:var(--text-faint);margin-top:10px;line-height:1.5}
+
+@media(max-width:820px){
+  .fgrid,.fgrid.two{grid-template-columns:1fr 1fr}
+  .dash-tiles{grid-template-columns:1fr 1fr} .minicharts{grid-template-columns:1fr} .tf-row{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -224,6 +269,7 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
     </div>
     <nav class="side-nav" id="sideNav">
       <button data-view="visao" class="active"><span class="ic">▣</span> Visão geral</button>
+      <button data-view="atualizar"><span class="ic">✎</span> Atualizar meus dados</button>
       <button data-view="kpis"><span class="ic">◉</span> Indicadores</button>
       <button data-view="metas"><span class="ic">▥</span> Metas & faturamento</button>
       <button data-view="evolucao"><span class="ic">▲</span> Régua de evolução</button>
@@ -235,7 +281,7 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
       <button data-view="materiais"><span class="ic">▤</span> Documentos</button>
     </nav>
     <div class="side-foot">
-      <button id="refreshBtn">↻ Atualizar dados</button>
+      <button id="refreshBtn">↻ Recarregar</button>
       <button id="logoutBtn">Sair</button>
     </div>
   </aside>
@@ -304,7 +350,8 @@ const LESSON_LIBRARY = {
     <h4>Sinal de que deu certo</h4><p>Você recusa (ou reprecifica) um job porque sabe que a margem não fecha.</p>` }
 };
 const VIEW_TITLE = {
-  visao:["Visão geral","Onde sua produtora está hoje"],
+  visao:["Visão geral","Seus números compilados ao longo do tempo"],
+  atualizar:["Atualizar meus dados","Preencha e salve — cada envio guarda o histórico"],
   kpis:["Indicadores","Seus números vs. o que é saudável numa produtora"],
   metas:["Metas & faturamento","Sua meta mensal vs. o que você realizou"],
   evolucao:["Régua de evolução","Em que estágio você está e o que destrava o próximo"],
@@ -373,8 +420,250 @@ function mergeFin(subs){ const fm={};
   [...subs].reverse().forEach(sub=>{ const f=(sub.data&&sub.data.financeiroMeses)||{};
     Object.keys(f).forEach(k=>{ fm[k]=f[k]; }); }); return fm; }
 
+// ===== MATURIDADE (cálculo 100% automático a partir dos dados preenchidos) =====
+function num(v){ const n=parseFloat(v); return isNaN(n)?null:n; }
+function avgNN(arr){ const a=arr.filter(x=>x!=null&&!isNaN(x)); return a.length? a.reduce((s,x)=>s+x,0)/a.length : null; }
+function brk(v, breaks){ if(v==null) return null; for(const [t,s] of breaks){ if(v>=t) return s; } return breaks[breaks.length-1][1]; }
+function currentYM(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
+
+// snapshot de maturidade de UMA submissão
+function maturitySnapshot(content, sub){
+  const d=(sub&&sub.data)||{};
+  const fmeses=d.financeiroMeses||{};
+  const months=Object.keys(fmeses).filter(k=> num(fmeses[k]&&fmeses[k].faturamento)>0).sort();
+  const finRef=months.length? fmeses[months[months.length-1]] : {};
+  const meta=num(content.metaFaturamentoMensal);
+  const margem=num(finRef.margem), fat=num(finRef.faturamento), cf=num(finRef.custoFixo), pl=num(finRef.proLabore), proj=num(finRef.projetos);
+  const h=d.horas||{}, c=d.comercial||{}, conc=d.concentracao||{};
+  const tot=num(h.total), fav=num(h.faturaveis), retr=num(h.retrabalho);
+  const ocup=(tot&&fav!=null&&tot>0)? fav/tot*100 : null;
+  const retraPct=(tot&&retr!=null&&tot>0)? retr/tot*100 : null;
+  const prop=num(c.propostas), fech=num(c.fechados), vf=num(c.valorFechado), mrr=num(c.mrr);
+  const pipe=(num(c.pipeline)!=null)? num(c.pipeline) : num((content.comercial||{}).pipelineValor);
+  const conv=(prop&&fech!=null&&prop>0)? fech/prop*100 : null;
+  const cov=(pipe!=null&&meta&&meta>0)? pipe/meta : null;
+  const mrrShare=(mrr!=null&&fat&&fat>0)? mrr/fat*100 : null;
+  let ticket=null; if(vf!=null&&fech&&fech>0) ticket=vf/fech; else if(fat!=null&&proj&&proj>0) ticket=fat/proj;
+  const concV=num(conc.maiorCliente);
+  const tarefas=d.tarefas||[];
+  let planoPct=null; if(tarefas.length){ const done=tarefas.filter(t=>t.status==="concluida").length; planoPct=done/tarefas.length*100; }
+  const prospStr=(c.prospec||"").toString().toLowerCase();
+  const prospAtiva = prospStr? !/(nao|não|inativ|parad|nenhum|sem )/.test(prospStr) : null;
+
+  const margemS=brk(margem,[[30,10],[25,9],[20,7],[15,5],[10,3],[0,1]]);
+  const recorrS=(mrr==null)?null:((cf!=null&&pl!=null&&mrr>=cf+pl)?10:(cf!=null&&mrr>=cf)?6:(mrr>0?3:1));
+  const atingS=(fat!=null&&meta&&meta>0)? brk(fat/meta*100,[[100,10],[80,8],[60,6],[40,4],[0,2]]) : null;
+  const convS=brk(conv,[[30,10],[20,8],[10,5],[0.01,3],[0,1]]);
+  const covS=brk(cov,[[3,10],[2,8],[1.5,6],[1,4],[0,2]]);
+  const prospS=(prospAtiva==null)?null:(prospAtiva?9:5);
+  const ocupS=(ocup==null)?null:((ocup>=60&&ocup<=78)?10:((ocup>=50&&ocup<60)||(ocup>78&&ocup<=85))?7:((ocup>=40&&ocup<50)||(ocup>85&&ocup<=92))?5:3);
+  const retraS=(retraPct==null)?null:(retraPct<=10?10:retraPct<=15?8:retraPct<=20?6:retraPct<=25?4:2);
+  const concS=(concV==null)?null:(concV<20?10:concV<30?8:concV<40?6:concV<=50?4:2);
+  const mrrShareS=brk(mrrShare,[[40,10],[25,8],[15,6],[5,4],[0,2]]);
+  const ticketS=brk(ticket,[[40000,10],[25000,8],[15000,6],[8000,4],[0,3]]);
+  const planoS=(planoPct==null)?null:Math.max(1,Math.round(planoPct/10));
+  const finFilled=months.length>0, horasFilled=(tot!=null&&tot>0), comFilled=(prop!=null||pipe!=null||mrr!=null);
+  const blocks=(finFilled?1:0)+(horasFilled?1:0)+(comFilled?1:0);
+  const trackingS=blocks? Math.round(blocks/3*10) : null;
+  const headroomS=(ocup==null)?null:(ocup<70?9:ocup<=85?6:3);
+
+  const dims={
+    financeiro: avgNN([margemS,recorrS,atingS]),
+    comercial: avgNN([convS,covS,prospS]),
+    operacao: avgNN([ocupS,retraS]),
+    escalabilidade: avgNN([concS,mrrShareS,headroomS]),
+    posicionamento: avgNN([ticketS,margemS]),
+    gestao: avgNN([planoS,trackingS,retraS]),
+    lideranca: avgNN([planoS,headroomS,prospS])
+  };
+  const base=content.maturidade||{};
+  const out={}; let calcCount=0, sum=0, n=0;
+  Object.keys(MAT_LBL).forEach(k=>{
+    let v=dims[k]; const calc=(v!=null);
+    if(v==null) v=(base[k]!=null? base[k] : null);
+    if(v!=null){ v=Math.max(0,Math.min(10,Math.round(v))); sum+=v; n++; if(calc) calcCount++; }
+    out[k]={val:v, calc};
+  });
+  return { dims:out, overall:(n? sum/n : null), hasData:(calcCount>0) };
+}
+function maturityCurrent(content, subs){ return maturitySnapshot(content, (subs&&subs[0])||null); }
+function stageFromScore(o){ if(o==null) return null; if(o<3) return "sobrevivencia"; if(o<4.5) return "estruturacao"; if(o<6.5) return "crescimento"; return "escala"; }
+
+// séries temporais (compilação de todas as submissões)
+function buildSeries(content, subs){
+  const cs=[...subs].slice().reverse(); // mais antigo -> mais novo
+  const labels=cs.map(s=> s.mes_ref? mesLabel(s.mes_ref) : (s.created_at? new Date(s.created_at).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}):"—"));
+  const lastFin=d=>{ const f=(d&&d.financeiroMeses)||{}; const ms=Object.keys(f).filter(k=>num(f[k]&&f[k].faturamento)>0).sort(); return ms.length? f[ms[ms.length-1]] : {}; };
+  const margem=cs.map(s=>num(lastFin(s.data).margem));
+  const ocup=cs.map(s=>{ const h=(s.data&&s.data.horas)||{}; const t=num(h.total),f=num(h.faturaveis); return (t&&f!=null&&t>0)?Math.round(f/t*100):null; });
+  const conv=cs.map(s=>{ const c=(s.data&&s.data.comercial)||{}; const p=num(c.propostas),f=num(c.fechados); return (p&&f!=null&&p>0)?Math.round(f/p*100):null; });
+  const mrr=cs.map(s=>{ const c=(s.data&&s.data.comercial)||{}; return num(c.mrr); });
+  const matOverall=cs.map(s=>{ const m=maturitySnapshot(content,s); return m.overall!=null? Math.round(m.overall*10)/10 : null; });
+  const fm=mergeFin(subs); const mk=Object.keys(fm).filter(k=>num(fm[k]&&fm[k].faturamento)>0).sort();
+  return { labels, margem, ocup, conv, mrr, matOverall, months:mk.map(mesLabel), fatByMonth:mk.map(k=>num(fm[k].faturamento)||0), meta:num(content.metaFaturamentoMensal) };
+}
+
+// ===== CHART HELPERS =====
+const _charts={};
+function destroyChart(id){ if(_charts[id]){ try{_charts[id].destroy();}catch(e){} delete _charts[id]; } }
+function destroyAllCharts(){ Object.keys(_charts).forEach(destroyChart); }
+function mkLine(canvasId, labels, datasets, yPct){
+  const ctx=document.getElementById(canvasId); if(!ctx||typeof Chart==="undefined") return;
+  destroyChart(canvasId);
+  _charts[canvasId]=new Chart(ctx,{ type:"line", data:{labels,datasets},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:datasets.length>1, labels:{color:"#A1A1AA",font:{family:"Cairo"}} } },
+      scales:{ x:{ ticks:{color:"#71717A",font:{family:"Cairo"}}, grid:{color:"#2B2B2E"} },
+        y:{ ticks:{color:"#71717A",callback:v=> yPct? v+"%" : (Math.abs(v)>=1000? "R$"+(v/1000)+"k" : v)}, grid:{color:"#2B2B2E"}, beginAtZero:true } } } });
+}
+function buildMetasChart(){
+  if(!_fin || !_fin.meses.length || typeof Chart==="undefined") return;
+  const ctx=document.getElementById("finChart"); if(!ctx) return;
+  const { fm, meses, meta }=_fin; destroyChart("finChart");
+  _charts["finChart"]=new Chart(ctx,{ data:{ labels:meses.map(mesLabel),
+      datasets:[
+        { type:"bar", label:"Faturamento", data:meses.map(k=>parseFloat(fm[k].faturamento)||0), backgroundColor:"rgba(255,30,61,.55)", borderColor:"#FF1E3D", borderWidth:1, borderRadius:4 },
+        { type:"line", label:"Meta", data:meses.map(()=>meta||0), borderColor:"#4ADE80", borderDash:[6,4], borderWidth:2, pointRadius:0, fill:false } ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{color:"#A1A1AA",font:{family:"Cairo"}} } },
+      scales:{ x:{ ticks:{color:"#71717A"}, grid:{color:"#2B2B2E"} },
+        y:{ ticks:{color:"#71717A",callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"#2B2B2E"}, beginAtZero:true } } } });
+}
+function buildVisaoCharts(){
+  if(!_series) return; const s=_series;
+  const ctxF=document.getElementById("vFat");
+  if(ctxF&&s.months.length){ destroyChart("vFat");
+    _charts["vFat"]=new Chart(ctxF,{ data:{ labels:s.months, datasets:[
+      { type:"bar", label:"Faturamento", data:s.fatByMonth, backgroundColor:"rgba(255,30,61,.55)", borderColor:"#FF1E3D", borderWidth:1, borderRadius:4 },
+      { type:"line", label:"Meta", data:s.months.map(()=>s.meta||0), borderColor:"#4ADE80", borderDash:[6,4], borderWidth:2, pointRadius:0, fill:false } ]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{color:"#A1A1AA",font:{family:"Cairo"}} } },
+        scales:{ x:{ ticks:{color:"#71717A"}, grid:{color:"#2B2B2E"} }, y:{ ticks:{color:"#71717A",callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"#2B2B2E"}, beginAtZero:true } } } }); }
+  mkLine("vMargem", s.labels, [{label:"Margem",data:s.margem,borderColor:"#4ADE80",backgroundColor:"rgba(74,222,128,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
+  mkLine("vOcup", s.labels, [{label:"Ocupação",data:s.ocup,borderColor:"#5cc8ff",backgroundColor:"rgba(92,200,255,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
+  mkLine("vConv", s.labels, [{label:"Conversão",data:s.conv,borderColor:"#FBBF24",backgroundColor:"rgba(251,191,36,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
+  mkLine("vMrr", s.labels, [{label:"MRR",data:s.mrr,borderColor:"#FF1E3D",backgroundColor:"rgba(255,30,61,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], false);
+}
+function buildEvolucaoCharts(){
+  if(!_mat) return;
+  const ctx=document.getElementById("evRadar");
+  if(ctx&&typeof Chart!=="undefined"){ destroyChart("evRadar");
+    const dims=Object.keys(MAT_LBL); const labels=dims.map(k=>MAT_LBL[k]); const vals=dims.map(k=>_mat.dims[k].val!=null?_mat.dims[k].val:0);
+    _charts["evRadar"]=new Chart(ctx,{ type:"radar", data:{ labels, datasets:[{ label:"Maturidade", data:vals, borderColor:"#FF1E3D", backgroundColor:"rgba(255,30,61,.18)", borderWidth:2, pointBackgroundColor:"#FF1E3D" }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
+        scales:{ r:{ min:0, max:10, ticks:{stepSize:2,color:"#71717A",backdropColor:"transparent"}, grid:{color:"#2B2B2E"}, angleLines:{color:"#2B2B2E"}, pointLabels:{color:"#A1A1AA",font:{family:"Cairo",size:12}} } } } }); }
+  if(_series && _series.matOverall.filter(x=>x!=null).length>1)
+    mkLine("evLine", _series.labels, [{label:"Maturidade geral",data:_series.matOverall,borderColor:"#4ADE80",backgroundColor:"rgba(74,222,128,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], false);
+}
+
+// ===== FORM (atualizar meus dados) =====
+function buildFormHTML(content, subs){
+  const sub0=subs[0]||null; const d=(sub0&&sub0.data)||{};
+  const fm=d.financeiroMeses||{}; const fmonths=Object.keys(fm).sort();
+  const lastK=fmonths.length? fmonths[fmonths.length-1] : currentYM();
+  const lf=fm[lastK]||{};
+  const h=d.horas||{}, c=d.comercial||{}, conc=d.concentracao||{}, mu=d.mudancas||{};
+  const v=x=> (x==null?"":x);
+  const lastT=d.tarefas||[];
+  const planoItems= lastT.length? lastT : (content.plano||[]).map(t=>({prioridade:t.prioridade,desc:t.descricao,status:t.status||"",obs:""}));
+  const statusOpts=sel=>["","pendente","em_andamento","concluida","atrasada","cancelada"].map(o=>`<option value="${o}" ${o===sel?"selected":""}>${o===""?"—":STATUS_LBL[o]}</option>`).join("");
+  const prospOpts=sel=>["","Ativa e constante","Ativa, mas irregular","Parada / só indicação"].map(o=>`<option value="${o}" ${o===sel?"selected":""}>${o===""?"—":o}</option>`).join("");
+  const planoHTML=planoItems.map(t=>`<div class="tf-item" data-prio="${esc(t.prioridade||"alta")}" data-desc="${esc(t.desc||"")}">
+    <div class="tf-desc"><span class="tp">[${PRIO_LBL[t.prioridade]||"ALTA"}]</span>${esc(t.desc||"")}</div>
+    <div class="tf-row"><div class="fld"><label>Status</label><select>${statusOpts(t.status||"")}</select></div>
+    <div class="fld"><label>Observação</label><textarea placeholder="Por que travou, o que aprendeu, próximo passo...">${esc(t.obs||"")}</textarea></div></div></div>`).join("");
+  let hist="";
+  if(fmonths.length){ hist=`<div class="block-title">Histórico financeiro já enviado</div><table class="histtable"><thead><tr><th>Mês</th><th>Faturamento</th><th>Margem</th><th>Projetos</th></tr></thead><tbody>`+
+    fmonths.map(k=>`<tr><td>${mesLabel(k)}</td><td>${fm[k].faturamento?fmtBRL(fm[k].faturamento):"—"}</td><td>${fm[k].margem?fm[k].margem+"%":"—"}</td><td>${fm[k].projetos||"—"}</td></tr>`).join("")+`</tbody></table>`; }
+  return `
+  <div class="form-sec"><h3>1 · Mês de referência</h3><div class="desc">Cada vez que você salvar, criamos um novo registro — seu histórico nunca é apagado. Para corrigir um mês já enviado, basta escolher o mesmo mês e salvar de novo.</div>
+    <div class="fgrid"><div class="fld"><label>Mês deste update</label><input type="month" id="f_mes" value="${lastK}"></div></div></div>
+  <div class="form-sec"><h3>2 · Financeiro do mês</h3><div class="desc">Os números do mês de referência escolhido acima.</div>
+    <div class="fgrid">
+      <div class="fld"><label>Faturamento bruto (R$)</label><input type="number" id="f_fat" min="0" value="${v(lf.faturamento)}"></div>
+      <div class="fld"><label>Custo fixo (R$)</label><input type="number" id="f_cf" min="0" value="${v(lf.custoFixo)}"></div>
+      <div class="fld"><label>Pró-labore (R$)</label><input type="number" id="f_pl" min="0" value="${v(lf.proLabore)}"></div>
+      <div class="fld"><label>Margem líquida (%)</label><input type="number" id="f_margem" min="0" max="100" value="${v(lf.margem)}"></div>
+      <div class="fld"><label>Caixa de reserva (R$)</label><input type="number" id="f_caixa" min="0" value="${v(lf.caixa)}"></div>
+      <div class="fld"><label>Nº de projetos fechados</label><input type="number" id="f_proj" min="0" value="${v(lf.projetos)}"></div>
+      <div class="fld full"><label>Observação</label><textarea id="f_obs">${esc(v(lf.obs))}</textarea></div>
+    </div>${hist}</div>
+  <div class="form-sec"><h3>3 · Horas do mês</h3><div class="desc">Capacidade do time no mês (agregado, não por projeto). A ocupação é calculada sozinha.</div>
+    <div class="fgrid">
+      <div class="fld"><label>Horas totais</label><input type="number" id="h_total" min="0" value="${v(h.total)}"></div>
+      <div class="fld"><label>Horas faturáveis</label><input type="number" id="h_fav" min="0" value="${v(h.faturaveis)}"></div>
+      <div class="fld"><label>Horas em retrabalho</label><input type="number" id="h_retr" min="0" value="${v(h.retrabalho)}"></div>
+      <div class="fld"><label>Custo médio da hora (R$)</label><input type="number" id="h_ch" min="0" value="${v(h.custoHora)}"></div>
+      <div class="fld full"><label>Observação</label><textarea id="h_obs">${esc(v(h.obs))}</textarea></div>
+    </div></div>
+  <div class="form-sec"><h3>4 · Comercial</h3><div class="desc">Pipeline e prospecção do mês.</div>
+    <div class="fgrid">
+      <div class="fld"><label>Leads novos</label><input type="number" id="c_leads" min="0" value="${v(c.leads)}"></div>
+      <div class="fld"><label>Reuniões</label><input type="number" id="c_reun" min="0" value="${v(c.reunioes)}"></div>
+      <div class="fld"><label>Propostas enviadas</label><input type="number" id="c_prop" min="0" value="${v(c.propostas)}"></div>
+      <div class="fld"><label>Propostas fechadas</label><input type="number" id="c_fech" min="0" value="${v(c.fechados)}"></div>
+      <div class="fld"><label>Valor fechado (R$)</label><input type="number" id="c_vf" min="0" value="${v(c.valorFechado)}"></div>
+      <div class="fld"><label>Pipeline aberto (R$)</label><input type="number" id="c_pipe" min="0" value="${v(c.pipeline)}"></div>
+      <div class="fld"><label>Receita recorrente / MRR (R$)</label><input type="number" id="c_mrr" min="0" value="${v(c.mrr)}"></div>
+      <div class="fld"><label>Canal principal</label><input type="text" id="c_canal" value="${esc(v(c.canal))}"></div>
+      <div class="fld"><label>Prospecção ativa?</label><select id="c_prospec">${prospOpts(c.prospec||"")}</select></div>
+      <div class="fld full"><label>Observação</label><textarea id="c_obs">${esc(v(c.obs))}</textarea></div>
+    </div></div>
+  <div class="form-sec"><h3>5 · Concentração de clientes</h3><div class="desc">O quanto sua receita depende de poucos clientes.</div>
+    <div class="fgrid two">
+      <div class="fld"><label>% do maior cliente</label><input type="number" id="c_maior" min="0" max="100" value="${v(conc.maiorCliente)}"></div>
+      <div class="fld"><label>% dos 3 maiores juntos</label><input type="number" id="c_top3" min="0" max="100" value="${v(conc.top3)}"></div>
+    </div></div>
+  <div class="form-sec"><h3>6 · Plano de ação</h3><div class="desc">Atualize o status de cada tarefa do seu plano.</div>
+    <div id="planoForm">${planoHTML||'<div class="mat-note">Nenhuma tarefa no plano ainda.</div>'}</div></div>
+  <div class="form-sec"><h3>7 · Mudanças estruturais e gargalos</h3><div class="desc">O que mudou na estrutura este mês.</div>
+    <div class="fgrid">
+      <div class="fld"><label>Contratações</label><input type="text" id="m_contr" value="${esc(v(mu.contratacoes))}"></div>
+      <div class="fld"><label>Saídas</label><input type="text" id="m_saidas" value="${esc(v(mu.saidas))}"></div>
+      <div class="fld"><label>Mudança de processo</label><input type="text" id="m_proc" value="${esc(v(mu.processo))}"></div>
+      <div class="fld"><label>Cliente importante (ganho/perdido)</label><input type="text" id="m_cli" value="${esc(v(mu.cliente))}"></div>
+      <div class="fld"><label>Novo gargalo</label><input type="text" id="m_garg" value="${esc(v(mu.gargalo))}"></div>
+      <div class="fld full"><label>Observação livre</label><textarea id="m_livre">${esc(v(mu.livre))}</textarea></div>
+    </div></div>
+  <div class="save-bar"><button id="saveBtn" onclick="saveUpdate()">Salvar atualização</button><span id="saveMsg" class="save-msg"></span></div>`;
+}
+function collectForm(){
+  const g=id=>{ const e=document.getElementById(id); return e? e.value : ""; };
+  const ref=g("f_mes")||currentYM();
+  const prevFin=(CURRENT&&CURRENT.subs[0]&&CURRENT.subs[0].data&&CURRENT.subs[0].data.financeiroMeses)? Object.assign({},CURRENT.subs[0].data.financeiroMeses) : {};
+  prevFin[ref]={ faturamento:g("f_fat"), custoFixo:g("f_cf"), proLabore:g("f_pl"), margem:g("f_margem"), caixa:g("f_caixa"), projetos:g("f_proj"), obs:g("f_obs") };
+  const tarefas=[]; document.querySelectorAll("#planoForm .tf-item").forEach(b=>{ const sel=b.querySelector("select"), ta=b.querySelector("textarea");
+    tarefas.push({ prioridade:b.dataset.prio||"alta", desc:b.dataset.desc||"", status:sel?sel.value:"", obs:ta?ta.value:"" }); });
+  const data={ financeiroMeses:prevFin,
+    horas:{ total:g("h_total"), faturaveis:g("h_fav"), retrabalho:g("h_retr"), custoHora:g("h_ch"), obs:g("h_obs") },
+    comercial:{ leads:g("c_leads"), reunioes:g("c_reun"), propostas:g("c_prop"), fechados:g("c_fech"), valorFechado:g("c_vf"), pipeline:g("c_pipe"), mrr:g("c_mrr"), canal:g("c_canal"), prospec:g("c_prospec"), obs:g("c_obs") },
+    concentracao:{ maiorCliente:g("c_maior"), top3:g("c_top3") },
+    mudancas:{ contratacoes:g("m_contr"), saidas:g("m_saidas"), processo:g("m_proc"), cliente:g("m_cli"), gargalo:g("m_garg"), livre:g("m_livre") },
+    tarefas, mesAtivo:ref };
+  return { ref, data };
+}
+async function insertSubmission(payload){
+  const r=await fetch(SUPABASE_URL+"/rest/v1/submissions",{ method:"POST",
+    headers:{ "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer "+SUPABASE_ANON_KEY, "Content-Type":"application/json", "Prefer":"return=minimal" },
+    body:JSON.stringify(payload) });
+  if(!r.ok){ const t=await r.text(); throw new Error("HTTP "+r.status+" "+t); }
+  return true;
+}
+async function saveUpdate(){
+  const btn=document.getElementById("saveBtn"), msg=document.getElementById("saveMsg");
+  const { ref, data }=collectForm();
+  if(!(parseFloat(data.financeiroMeses[ref].faturamento)>0)){
+    msg.textContent="Preencha ao menos o faturamento do mês antes de salvar."; msg.className="save-msg err"; return; }
+  msg.textContent=""; btn.disabled=true; btn.textContent="Salvando...";
+  try{
+    await insertSubmission({ mentee_code:MENTEE_CODE, mentee_name:(CURRENT&&CURRENT.content&&CURRENT.content.nome)||"", mes_ref:ref, data });
+    msg.textContent="Atualização salva! Histórico preservado."; msg.className="save-msg ok";
+    await loadAndRender(); showView("visao");
+  }catch(e){ msg.textContent="Erro ao salvar: "+e.message; msg.className="save-msg err"; btn.disabled=false; btn.textContent="Salvar atualização"; }
+}
+
 // ===== RENDER =====
-let chartInstance=null, _chartReady=false, _fin=null;
+let VIEWS={}, CURRENT=null, MENTEE_CODE=null, _lastView="visao";
+let _fin=null, _mat=null, _matStage=null, _series=null;
 function viewsHTML(content, subs){
   const fm = mergeFin(subs);
   const meses = Object.keys(fm).filter(k=> fm[k] && parseFloat(fm[k].faturamento)>0).sort();
@@ -382,31 +671,45 @@ function viewsHTML(content, subs){
   const meta = content.metaFaturamentoMensal || null;
   const ating = (ultimoFat!=null && meta) ? Math.round(ultimoFat/meta*100) : null;
   _fin = { fm, meses, meta };
+  const finUlt = meses.length ? fm[meses[meses.length-1]] : null;
+  _mat = maturityCurrent(content, subs);
+  _matStage = stageFromScore(_mat.overall) || content.momento;
+  _series = buildSeries(content, subs);
+  const hasSubs = subs.length>0;
 
-  // VISÃO
-  let visao = `<div class="kpis">
-    <div class="kpi"><div class="k">Faturamento (último mês)</div><div class="v accent">${ultimoFat!=null?fmtBRL(ultimoFat):'—'}</div><div class="d">${meses.length?mesLabel(meses[meses.length-1]):'sem update ainda'}</div></div>
-    <div class="kpi"><div class="k">Meta mensal</div><div class="v">${meta?fmtBRL(meta):'—'}</div><div class="d">meta do plano</div></div>
-    <div class="kpi"><div class="k">Atingimento</div><div class="v ${ating!=null?(ating>=100?'green':(ating>=70?'amber':'accent')):''}">${ating!=null?ating+'%':'—'}</div><div class="d">realizado vs meta</div></div>
-    <div class="kpi"><div class="k">Meses preenchidos</div><div class="v">${meses.length}</div><div class="d">no portal de update</div></div>
-  </div>
-  <div class="block-title">Resumo</div>
-  <div class="resumo">${esc(content.resumo||"")}</div>`;
-  if(content.maturidade){
-    visao += `<div class="block-title">Maturidade do negócio (0-10)</div><div class="mat-grid">`;
-    Object.keys(MAT_LBL).forEach(dim=>{ const v=content.maturidade[dim]; if(v==null) return;
-      visao += `<div class="mat-row"><div class="lbl">${MAT_LBL[dim]}</div><div class="mat-bar"><span class="${fillClass(v)}" style="width:${v*10}%"></span></div><div class="num">${v}</div></div>`; });
-    visao += `</div>`;
+  // VISÃO (dashboard compilado)
+  let visao;
+  if(!hasSubs){
+    visao = `<div class="empty-fin">Você ainda não enviou nenhuma atualização.<br>
+      Vá em <a href="#" data-goto="atualizar">Atualizar meus dados</a>, preencha seus números e clique em "Salvar atualização" — seus gráficos aparecem aqui automaticamente.</div>
+      <div class="block-title">Resumo</div><div class="resumo">${esc(content.resumo||"")}</div>`;
+  } else {
+    const matScore = _mat.overall!=null ? (Math.round(_mat.overall*10)/10) : null;
+    const margemUlt = (finUlt && finUlt.margem) ? finUlt.margem : null;
+    visao = `<div class="dash-tiles">
+      <div class="kpi"><div class="k">Faturamento (último mês)</div><div class="v accent">${ultimoFat!=null?fmtBRL(ultimoFat):'—'}</div><div class="d">${meses.length?mesLabel(meses[meses.length-1]):'—'}</div></div>
+      <div class="kpi"><div class="k">Atingimento da meta</div><div class="v ${ating!=null?(ating>=100?'green':(ating>=70?'amber':'accent')):''}">${ating!=null?ating+'%':'—'}</div><div class="d">meta ${meta?fmtBRL(meta):'—'}</div></div>
+      <div class="kpi"><div class="k">Margem (último mês)</div><div class="v ${margemUlt!=null?(margemUlt>=25?'green':(margemUlt>=15?'amber':'accent')):''}">${margemUlt!=null?margemUlt+'%':'—'}</div><div class="d">lucro sobre a receita</div></div>
+      <div class="kpi"><div class="k">Maturidade geral</div><div class="v ${matScore!=null?(matScore>=6.5?'green':(matScore>=4?'amber':'accent')):''}">${matScore!=null?matScore:'—'}<span style="font-size:14px;font-weight:700">/10</span></div><div class="d">média das 7 dimensões</div></div>
+    </div>
+    <div class="full-chart" style="margin-top:14px"><div class="mct">Faturamento mensal vs. meta</div><div class="cnv-lg"><canvas id="vFat"></canvas></div></div>
+    <div class="minicharts">
+      <div class="mc"><div class="mct">Margem (%) ao longo do tempo</div><div class="cnv"><canvas id="vMargem"></canvas></div></div>
+      <div class="mc"><div class="mct">Ocupação produtiva (%)</div><div class="cnv"><canvas id="vOcup"></canvas></div></div>
+      <div class="mc"><div class="mct">Conversão comercial (%)</div><div class="cnv"><canvas id="vConv"></canvas></div></div>
+      <div class="mc"><div class="mct">Receita recorrente · MRR</div><div class="cnv"><canvas id="vMrr"></canvas></div></div>
+    </div>
+    <div class="block-title">Resumo</div><div class="resumo">${esc(content.resumo||"")}</div>`;
   }
 
   // METAS
   let metas;
   if(meses.length){
     metas = `<div class="chart-wrap"><canvas id="finChart"></canvas></div>
-      <div class="note">Linha verde tracejada = sua meta mensal. Barras = faturamento que você preencheu no portal de update.</div>`;
+      <div class="note">Linha verde tracejada = sua meta mensal. Barras = faturamento que você preencheu em Atualizar meus dados.</div>`;
   } else {
     metas = `<div class="empty-fin">Você ainda não enviou nenhum update.<br>
-      Preencha seu primeiro mês no <a href="${PORTAL_UPDATE_URL}" target="_blank">portal de update</a> e clique em "Gerar Update Mensal" — seu faturamento vs. meta aparece aqui automaticamente.</div>`;
+      Preencha seu primeiro mês em <a href="#" data-goto="atualizar">Atualizar meus dados</a> e clique em "Salvar atualização" — seu faturamento vs. meta aparece aqui automaticamente.</div>`;
   }
 
   // ALAVANCAS
@@ -425,13 +728,17 @@ function viewsHTML(content, subs){
     comercial += `<div class="block-title">Oportunidades</div><ul class="clean">`+content.oportunidades.map(o=>`<li>${esc(o)}</li>`).join('')+`</ul>`;
   }
 
-  // PLANO
+  // PLANO (usa o status enviado pelo aluno quando houver)
+  const subT = (subs[0] && subs[0].data && subs[0].data.tarefas) || [];
+  const planoSrc = subT.length
+    ? subT.map(t=>({prioridade:t.prioridade, descricao:t.desc, status:t.status, prazo:"", obs:t.obs}))
+    : (content.plano||[]);
   let plano;
-  if(content.plano&&content.plano.length){
+  if(planoSrc.length){
     const order={atrasada:0,em_andamento:1,pendente:2,concluida:3,cancelada:4}, po={maxima:0,alta:1,media:2};
-    const sorted=[...content.plano].sort((a,b)=> (po[a.prioridade]??1)-(po[b.prioridade]??1) || (order[a.status]??2)-(order[b.status]??2));
-    plano = '<div class="tlist">'+sorted.map(t=>`<div class="titem"><span class="tstatus ts-${t.status||'pendente'}">${STATUS_LBL[t.status]||"A fazer"}</span><div class="td"><span class="tp">[${PRIO_LBL[t.prioridade]||'ALTA'}]</span> ${esc(t.descricao)}${t.prazo?`<div class="tprz">Prazo: ${esc(t.prazo)}</div>`:''}</div></div>`).join('')+'</div>'
-      + `<div class="note">Atualize o status de cada tarefa no <a href="${PORTAL_UPDATE_URL}" target="_blank">portal de update</a>, no seu update mensal.</div>`;
+    const sorted=[...planoSrc].sort((a,b)=> (po[a.prioridade]??1)-(po[b.prioridade]??1) || (order[a.status]??2)-(order[b.status]??2));
+    plano = '<div class="tlist">'+sorted.map(t=>`<div class="titem"><span class="tstatus ts-${t.status||'pendente'}">${STATUS_LBL[t.status]||"A fazer"}</span><div class="td"><span class="tp">[${PRIO_LBL[t.prioridade]||'ALTA'}]</span> ${esc(t.descricao)}${t.prazo?`<div class="tprz">Prazo: ${esc(t.prazo)}</div>`:''}${t.obs?`<div class="tprz">${esc(t.obs)}</div>`:''}</div></div>`).join('')+'</div>'
+      + `<div class="note">Atualize o status de cada tarefa em <a href="#" data-goto="atualizar">Atualizar meus dados</a>.</div>`;
   } else { plano = '<div class="materiais"><div class="none">Nenhuma tarefa no plano.</div></div>'; }
 
   // DIREÇÃO
@@ -456,31 +763,31 @@ function viewsHTML(content, subs){
   const cards = [];
   // Margem
   (()=>{ const m=num(finRef.margem);
-    if(m==null) return cards.push(card("Margem líquida","—","na","Saudável: 25–35%","Preencha a margem no portal de update para ver este indicador."));
+    if(m==null) return cards.push(card("Margem líquida","—","na","Saudável: 25–35%","Preencha a margem em Atualizar meus dados para ver este indicador."));
     const st = m>=25?"ok":(m>=15?"warn":"bad");
     const co = st==="ok"?"Margem saudável. Proteja-a ao crescer — volume sem margem destrói lucro.":(st==="warn"?'Está na zona de atenção. Reveja preço e custo por job. <a href="#" data-goto="aprendizado">Ver aula de margem</a>.':'Abaixo do saudável — você pode estar vendendo perto do custo. <a href="#" data-goto="aprendizado">Veja como precificar por valor</a>.');
     cards.push(card("Margem líquida", m+"%", st, "Saudável: 25–35%", co)); })();
   // Ocupação
   (()=>{ const t=num(horas.total), f=num(horas.faturaveis);
-    if(t==null||f==null||t<=0) return cards.push(card("Ocupação produtiva","—","na","Ideal: 60–75%","Preencha horas totais e faturáveis no portal de update."));
+    if(t==null||f==null||t<=0) return cards.push(card("Ocupação produtiva","—","na","Ideal: 60–75%","Preencha horas totais e faturáveis em Atualizar meus dados."));
     const o=Math.round(f/t*100); const st = (o>=60&&o<=82)?"ok":((o>=50&&o<60)||(o>82&&o<=90)?"warn":"bad");
     const co = o>82?"Ocupação alta demais — risco de exaustão do time. Vale contratar ou subir preço.":(o<50?"Muita capacidade ociosa ou retrabalho. Olhe o que consome as horas não faturáveis.":(st==="warn"?"Quase lá. Reduza retrabalho e tempo não faturável.":"Faixa saudável: o time produz sem se esgotar."));
     cards.push(card("Ocupação produtiva", o+"%", st, "Ideal: 60–75%", co)); })();
   // Retrabalho
   (()=>{ const t=num(horas.total), r=num(horas.retrabalho);
-    if(t==null||r==null||t<=0) return cards.push(card("Retrabalho","—","na","Alvo: abaixo de 15%","Preencha horas de retrabalho no portal de update."));
+    if(t==null||r==null||t<=0) return cards.push(card("Retrabalho","—","na","Alvo: abaixo de 15%","Preencha horas de retrabalho em Atualizar meus dados."));
     const rw=Math.round(r/t*100); const st = rw<=15?"ok":(rw<=25?"warn":"bad");
     const co = st==="ok"?"Retrabalho sob controle.":(st==="warn"?"Retrabalho começando a comer margem — reforce briefing e aprovações.":'Retrabalho alto: processo/briefing precisa de gates. <a href="#" data-goto="aprendizado">Ver aula de delegação/processo</a>.');
     cards.push(card("Retrabalho", rw+"%", st, "Alvo: abaixo de 15%", co)); })();
   // Conversão
   (()=>{ const p=num(comL.propostas), fc=num(comL.fechados);
-    if(p==null||fc==null||p<=0) return cards.push(card("Conversão comercial","—","na","Saudável: 20–35%","Preencha propostas enviadas e fechadas no portal de update."));
+    if(p==null||fc==null||p<=0) return cards.push(card("Conversão comercial","—","na","Saudável: 20–35%","Preencha propostas enviadas e fechadas em Atualizar meus dados."));
     const c=Math.round(fc/p*100); const st = c>=20?"ok":(c>=10?"warn":"bad");
     const co = st==="ok"?"Boa conversão — seu discurso e proposta estão funcionando.":(st==="warn"?"Conversão mediana. Teste diagnóstico antes da proposta e follow-up estruturado.":"Conversão baixa: pode ser ICP errado ou proposta sem método. Reveja a qualificação.");
     cards.push(card("Conversão comercial", c+"%", st, "Saudável: 20–35%", co)); })();
   // Cobertura de pipeline
   (()=>{ const pipe=num(comL.pipeline)!=null?num(comL.pipeline):num((content.comercial||{}).pipelineValor); const meta2=num(content.metaFaturamentoMensal);
-    if(pipe==null||meta2==null||meta2<=0) return cards.push(card("Cobertura de pipeline","—","na","Ideal: ~3x a meta","Preencha o pipeline aberto no portal de update."));
+    if(pipe==null||meta2==null||meta2<=0) return cards.push(card("Cobertura de pipeline","—","na","Ideal: ~3x a meta","Preencha o pipeline aberto em Atualizar meus dados."));
     const cov=pipe/meta2; const st = cov>=3?"ok":(cov>=1.5?"warn":"bad");
     const co = st==="ok"?"Pipeline saudável para bater a meta.":(st==="warn"?"Pipeline apertado — alimente a prospecção para não faltar mês que vem.":'Pipeline insuficiente: ative prospecção já. <a href="#" data-goto="aprendizado">Ver aula de prospecção</a>.');
     cards.push(card("Cobertura de pipeline", cov.toFixed(1)+"x", st, "Ideal: ~3x a meta", co)); })();
@@ -491,7 +798,7 @@ function viewsHTML(content, subs){
     cards.push(card("Ticket médio", fmtBRL(tk), "na", "Alavanca: subir ticket > buscar volume", 'Subir o ticket é a forma mais leve de crescer. <a href="#" data-goto="aprendizado">Ver aula de posicionamento</a>.')); })();
   // Recorrência (MRR vs piso)
   (()=>{ const mrr=num(comL.mrr), cf=num(finRef.custoFixo), pl=num(finRef.proLabore), ft=num(finRef.faturamento);
-    if(mrr==null) return cards.push(card("Receita recorrente","—","na","Ideal: cobrir custo fixo + pró-labore","Preencha a receita recorrente (MRR) no portal de update."));
+    if(mrr==null) return cards.push(card("Receita recorrente","—","na","Ideal: cobrir custo fixo + pró-labore","Preencha a receita recorrente (MRR) em Atualizar meus dados."));
     const piso = (cf!=null&&pl!=null)?cf+pl:(cf!=null?cf:null);
     let st="warn", co="Recorrência crescendo — meta: cobrir a conta fixa da empresa.";
     if(piso!=null){ if(mrr>=piso){ st="ok"; co="Sua recorrência já paga custo fixo + pró-labore. Esse é o piso que dá liberdade pra vender melhor."; }
@@ -501,18 +808,29 @@ function viewsHTML(content, subs){
     cards.push(card("Receita recorrente", fmtBRL(mrr), st, "Ideal: cobrir custo fixo + pró-labore"+pctR, co)); })();
   // Concentração
   (()=>{ const mc=num(conc.maiorCliente);
-    if(mc==null) return cards.push(card("Concentração de clientes","—","na","Risco se >30% num só cliente","Preencha o % do maior cliente no portal de update."));
+    if(mc==null) return cards.push(card("Concentração de clientes","—","na","Risco se >30% num só cliente","Preencha o % do maior cliente em Atualizar meus dados."));
     const st = mc<30?"ok":(mc<=50?"warn":"bad");
     const co = st==="ok"?"Receita bem distribuída — perder um cliente não derruba o ano.":(st==="warn"?"Atenção: um cliente pesa bastante. Diversifique com recorrência e prospecção.":'Risco alto: depende demais de um cliente. <a href="#" data-goto="aprendizado">Ver aula de concentração</a>.');
     cards.push(card("Concentração (maior cliente)", mc+"%", st, "Risco se >30% num só cliente", co)); })();
 
   const kpis = `<div class="kpi-grid">${cards.join("")}</div>
-    <div class="note">Os faróis comparam seus números com benchmarks de produtoras saudáveis. Atualize seus dados no <a href="${PORTAL_UPDATE_URL}" target="_blank">portal de update</a> para mantê-los vivos.</div>`;
+    <div class="note">Os faróis comparam seus números com benchmarks de produtoras saudáveis. Atualize seus números em <a href="#" data-goto="atualizar">Atualizar meus dados</a> para mantê-los vivos.</div>`;
 
-  // ===== EVOLUÇÃO =====
-  let evolucao = '<div class="ladder">' + STAGES.map((s,i)=>
-    `<div class="stage ${s.id===content.momento?'current':''}"><div class="nlevel">${i+1}</div>
-      <div><div class="sname">${s.nome}${s.id===content.momento?' <span class="scur">Você está aqui</span>':''}</div>
+  // ===== EVOLUÇÃO (maturidade calculada) =====
+  const dimsK = Object.keys(MAT_LBL);
+  const matRows = dimsK.map(k=>{ const o=_mat.dims[k]; const v=o.val;
+    return `<div class="mat-row"><div class="lbl">${MAT_LBL[k]}</div><div class="mat-bar"><span class="${v==null?'':fillClass(v)}" style="width:${v==null?0:v*10}%"></span></div><div class="num">${v==null?'—':v}</div></div>`; }).join('');
+  let evolucao = `<div class="radar-wrap"><canvas id="evRadar"></canvas></div>
+    <div class="mat-note">${_mat.hasData
+      ? 'Calculado a partir dos seus números mais recentes. As dimensões que você ainda não alimentou usam o diagnóstico inicial do mentor como ponto de partida.'
+      : 'Ainda sem dados preenchidos — mostrando o diagnóstico inicial do seu mentor. Atualize seus dados em "Atualizar meus dados" para o cálculo passar a refletir a realidade.'}</div>
+    <div class="block-title">Maturidade por dimensão (0-10)</div><div class="mat-grid">${matRows}</div>`;
+  if(_series && _series.matOverall.filter(x=>x!=null).length>1){
+    evolucao += `<div class="block-title">Evolução da maturidade geral</div><div class="mc"><div class="cnv" style="height:200px"><canvas id="evLine"></canvas></div></div>`;
+  }
+  evolucao += `<div class="block-title">Em que estágio você está</div><div class="ladder">` + STAGES.map((s,i)=>
+    `<div class="stage ${s.id===_matStage?'current':''}"><div class="nlevel">${i+1}</div>
+      <div><div class="sname">${s.nome}${s.id===_matStage?' <span class="scur">Você está aqui</span>':''}</div>
       <div class="sdesc">${esc(s.desc)}</div></div></div>`).join('') + '</div>';
   if(content.direcao) evolucao += `<div class="block-title">Como subir de nível</div><div class="next-box">${esc(content.direcao)}</div>`;
 
@@ -523,46 +841,32 @@ function viewsHTML(content, subs){
         return `<details class="lesson"><summary><div><div class="lt">${esc(L.titulo)}</div><div class="lr">${esc(L.resumo)}</div></div><span class="chev">▸</span></summary><div class="lbody">${L.corpo}</div></details>`; }).join('')
     : '<div class="materiais"><div class="none">Sua trilha de aprendizado ainda não foi configurada. Fale com seu mentor.</div></div>';
 
-  return { visao, kpis, metas, evolucao, alavancas:alav, comercial, plano, aprendizado, direcao, materiais };
+  const atualizar = buildFormHTML(content, subs);
+  return { visao, atualizar, kpis, metas, evolucao, alavancas:alav, comercial, plano, aprendizado, direcao, materiais };
 }
 
-function buildChart(){
-  if(_chartReady || !_fin || !_fin.meses.length || typeof Chart==="undefined") return;
-  const ctx=document.getElementById("finChart"); if(!ctx) return;
-  const { fm, meses, meta } = _fin;
-  chartInstance = new Chart(ctx,{
-    data:{ labels: meses.map(mesLabel),
-      datasets:[
-        { type:"bar", label:"Faturamento", data: meses.map(k=>parseFloat(fm[k].faturamento)||0),
-          backgroundColor:"rgba(255,30,61,.55)", borderColor:"#FF1E3D", borderWidth:1, borderRadius:4 },
-        { type:"line", label:"Meta", data: meses.map(()=> meta||0),
-          borderColor:"#4ADE80", borderDash:[6,4], borderWidth:2, pointRadius:0, fill:false }
-      ]},
-    options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ labels:{ color:"#A1A1AA", font:{family:"Cairo"} } } },
-      scales:{ x:{ ticks:{color:"#71717A"}, grid:{color:"#2B2B2E"} },
-        y:{ ticks:{color:"#71717A", callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"#2B2B2E"}, beginAtZero:true } } }
-  });
-  _chartReady = true;
-}
-
-let VIEWS = {};
 function showView(name){
+  _lastView = name;
   const [title, sub] = VIEW_TITLE[name] || [name,""];
   document.getElementById("viewContainer").innerHTML =
     `<div class="view-head"><h1>${title}</h1><div class="vsub">${sub}</div></div>
      <div class="view active">${VIEWS[name]||""}</div>`;
   document.querySelectorAll("#sideNav button").forEach(b=> b.classList.toggle("active", b.dataset.view===name));
-  if(name==="metas"){ _chartReady=false; chartInstance&&chartInstance.destroy(); buildChart(); }
+  destroyAllCharts();
+  if(name==="metas") buildMetasChart();
+  else if(name==="visao") buildVisaoCharts();
+  else if(name==="evolucao") buildEvolucaoCharts();
   window.scrollTo({top:0});
 }
 
 function renderApp(content, subs){
+  CURRENT = { content, subs };
   document.getElementById("nomeProdutora").textContent = content.nome || "Produtora";
   document.getElementById("empresaProdutora").textContent = content.empresa || "";
-  document.getElementById("momentoBadge").textContent = "Momento: " + (MOMENTO_LBL[content.momento]||content.momento||"—");
   VIEWS = viewsHTML(content, subs);
-  showView("visao");
+  const stage = _matStage || content.momento;
+  document.getElementById("momentoBadge").textContent = "Momento: " + (MOMENTO_LBL[stage]||stage||"—");
+  showView(_lastView || "visao");
 }
 
 // ===== FLOW =====
@@ -571,6 +875,7 @@ async function loadAndRender(){
   try{
     const s = await validToken(); if(!s){ doLogout(); return; }
     if(!s.content){ document.getElementById("viewContainer").innerHTML = '<div class="loading">Seu conteúdo ainda não foi configurado. Fale com seu mentor.</div>'; return; }
+    MENTEE_CODE = s.code;
     const subs = await fetchSubmissions(s.code);
     renderApp(s.content, subs);
   }catch(e){
