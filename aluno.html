@@ -7,21 +7,23 @@
 <title>Portal do Aluno · Publi Advisor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#0B0B0C; --surface:#161617; --surface-alt:#1E1E20;
-  --border:#2B2B2E; --border-strong:#3C3C40;
-  --text:#F4F4F5; --text-muted:#A1A1AA; --text-faint:#71717A;
-  --accent:#FF1E3D; --accent-soft:#2B0D12; --ink:#FF1E3D;
-  --green:#4ADE80; --green-soft:#12251A;
-  --amber:#FBBF24; --amber-soft:#2A220A; --blue:#5cc8ff;
+  --bg:#0E0D0B; --surface:#141310; --surface-alt:#1B1916;
+  --border:rgba(243,239,229,.14); --border-strong:rgba(243,239,229,.30);
+  --text:#F3EFE5; --text-muted:#9A9384; --text-faint:#6E685C;
+  --accent:#E5322B; --accent-soft:#2A0F0D; --ink:#E5322B;
+  --green:#8FB069; --green-soft:#16210F;
+  --amber:#D9A441; --amber-soft:#241B0A; --blue:#8FB7C9;
+  --off:#F3EFE5; --off-2:#E7E1D3; --ink-on-off:#141210;
+  --serif:'Fraunces',Georgia,serif; --mono:'Space Mono','SFMono-Regular',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family:"Cairo",-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Helvetica,Arial,sans-serif;
-  background:var(--bg); color:var(--text); min-height:100vh; line-height:1.55; letter-spacing:.01em;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--text); min-height:100vh; line-height:1.6;
 }
 input{color:var(--text);font-family:inherit}
 input::placeholder{color:var(--text-faint);opacity:1}
@@ -300,22 +302,68 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
   .fgrid,.fgrid.two{grid-template-columns:1fr 1fr}
   .dash-tiles{grid-template-columns:1fr 1fr} .minicharts{grid-template-columns:1fr} .tf-row{grid-template-columns:1fr}
 }
+
+/* ===================== EDITORIAL SKIN (preto + off-white + vermelho) ===================== */
+/* títulos e numerais em serifa */
+.login-card h1,.view-head h1,.side-prod .nome,.kpi .v,.kpicard .val,.mbox .n,.alav-card .t,.lesson summary .lt,.stage .sname,.login-stmt{font-family:var(--serif);font-weight:500;letter-spacing:-.01em}
+.view-head h1{font-size:30px}
+.kpi .v{font-size:34px;font-weight:500;letter-spacing:-.02em}
+.kpicard .val{font-weight:500} .mbox .n{font-weight:500;font-size:20px}
+.side-prod .nome{font-weight:500;font-size:22px}
+/* rótulos / eyebrows em mono caixa-alta */
+.brand,.side-brand,.block-title,.kpi .k,.field label,.fld label,.form-sec h3,.kpicard .name,.mc .mct,.full-chart .mct,.diag-h,.diag-t,.mbox .l,.momento-badge,.tstatus,.okr-krhead,.view-head .vsub,.histtable th{font-family:var(--mono);text-transform:uppercase;letter-spacing:.16em}
+.block-title,.form-sec h3{color:var(--text-muted);font-weight:400;font-size:11px}
+.kpi .k,.field label,.fld label,.kpicard .name,.mc .mct,.full-chart .mct{color:var(--text-faint);font-weight:400;font-size:10px}
+.view-head .vsub{font-size:10.5px;letter-spacing:.14em;color:var(--text-faint)}
+/* cantos retos (editorial) */
+.login-card,.kpi,.chart-wrap,.mat-grid,.alav-card,ul.clean,.titem,.mbox,.direcao,.materiais .mat-link,.kpicard,.stage,.next-box,.lesson,.form-sec,.okr-obj,.tf-item,.ce-card,.ce-doc,.full-chart,.mc,.radar-wrap,.empty-fin,.resumo,.fld input,.fld select,.fld textarea,.field input,.btn-main,#okrSaveBtn,#ceSaveBtn,.save-bar button,#ce_upbtn,.ce-up #ce_uptitulo,.okr-kr input,.okr-otitle,#okr_periodo,.okr-x,.okr-addkr,.okr-addobj,.ce-row input,.ce-row textarea,.ce-card input,.ce-card textarea,.ce-card select{border-radius:2px}
+.kr-bar,.mat-bar{border-radius:0}
+/* régua: barras off-white, vermelho só nas baixas */
+.mat-bar>span.mid{background:var(--text-muted)} .mat-bar>span.hi{background:var(--text)} .mat-bar>span.low{background:var(--accent)}
+.kr-bar>span{background:var(--text)}
+/* navegação lateral */
+.side-brand{color:var(--text-faint);font-weight:400}
+.side-nav button{font-weight:500}
+.side-nav button.active{background:var(--surface-alt);color:var(--text);box-shadow:inset 3px 0 0 var(--accent)}
+.side-nav button.active .ic{color:var(--accent);opacity:1}
+/* diagnóstico de redes: bloco invertido off-white */
+.diag{background:var(--off)!important;color:var(--ink-on-off);border:1px solid var(--off);border-left:3px solid var(--accent);border-radius:2px;padding:26px 24px}
+.diag-h,.diag-ig,.diag-sub,.diag-t{color:#8A8270}
+.diag-sec p,.diag-sec li{color:#2E2A24}
+.diag-sec.refl li{color:#5A5347}
+/* login editorial em split */
+.login-wrap{display:grid;grid-template-columns:1.1fr .9fr;align-items:stretch;padding:0;background:var(--bg)}
+.login-left{display:flex;flex-direction:column;justify-content:space-between;padding:60px 56px;border-right:1px solid var(--border)}
+.login-right{display:flex;flex-direction:column;justify-content:center;padding:60px 56px;max-width:560px}
+.login-eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:.22em;font-size:10.5px;color:var(--text-faint)}
+.login-stmt{font-size:clamp(32px,4.4vw,56px);line-height:1.04;margin-top:30px;color:var(--text)}
+.login-stmt span{font-style:italic;color:var(--accent)}
+.login-foot{font-family:var(--mono);text-transform:uppercase;letter-spacing:.16em;font-size:10px;color:var(--text-faint);display:flex;justify-content:space-between;gap:16px}
+.login-right .brand{font-family:var(--mono);text-transform:uppercase;letter-spacing:.22em;font-size:10.5px;color:var(--text-faint);font-weight:400;margin-bottom:22px}
+.login-right .field input{background:transparent;border:none;border-bottom:1.5px solid var(--text);border-radius:0;font-family:var(--serif);font-size:19px;padding:9px 2px}
+.login-right .field input:focus{outline:none;border-bottom-color:var(--accent)}
+.login-right .btn-main{background:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.16em;font-weight:400;font-size:12px;border-radius:0;padding:15px}
+.login-right .hint{text-align:left}
+@media(max-width:780px){.login-wrap{grid-template-columns:1fr}.login-left{display:none}}
 </style>
 </head>
 <body>
 
 <!-- ========== LOGIN ========== -->
 <div id="loginScreen" class="login-wrap">
-  <div class="login-card">
-    <div class="brand">Mentoria · Publi Advisor</div>
-    <h1>Portal do Aluno</h1>
-    <div class="sub">Sua central de estratégia, metas e resultados.</div>
+  <div class="login-left">
+    <div class="login-eyebrow">Mentoria · Catalunya Filmes</div>
+    <h2 class="login-stmt">Onde a sua produtora<br>vira <span>empresa</span>.</h2>
+    <div class="login-foot"><span>Estratégia · Números · Direção</span><span>Edição 2026</span></div>
+  </div>
+  <div class="login-right">
+    <div class="brand">Entrar no portal</div>
     <div id="loginErr" class="login-err hidden"></div>
-    <div class="field"><label>E-mail de acesso</label>
-      <input type="email" id="email" placeholder="seu acesso" autocomplete="username"></div>
+    <div class="field"><label>E-mail da produtora</label>
+      <input type="email" id="email" placeholder="voce@suaprodutora.com" autocomplete="username"></div>
     <div class="field"><label>Senha</label>
       <input type="password" id="password" placeholder="sua senha" autocomplete="current-password"></div>
-    <button class="btn-main" id="loginBtn">Entrar</button>
+    <button class="btn-main" id="loginBtn">Entrar →</button>
     <div class="hint">Use o e-mail e a senha que seu mentor enviou. Acesso individual e privado da sua produtora.</div>
   </div>
 </div>
@@ -610,9 +658,9 @@ function mkLine(canvasId, labels, datasets, yPct){
   destroyChart(canvasId);
   _charts[canvasId]=new Chart(ctx,{ type:"line", data:{labels,datasets},
     options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:datasets.length>1, labels:{color:"#A1A1AA",font:{family:"Cairo"}} } },
-      scales:{ x:{ ticks:{color:"#71717A",font:{family:"Cairo"}}, grid:{color:"#2B2B2E"} },
-        y:{ ticks:{color:"#71717A",callback:v=> yPct? v+"%" : (Math.abs(v)>=1000? "R$"+(v/1000)+"k" : v)}, grid:{color:"#2B2B2E"}, beginAtZero:true } } } });
+      plugins:{ legend:{ display:datasets.length>1, labels:{color:"#9A9384",font:{family:"Inter"}} } },
+      scales:{ x:{ ticks:{color:"#6E685C",font:{family:"Inter"}}, grid:{color:"rgba(243,239,229,0.10)"} },
+        y:{ ticks:{color:"#6E685C",callback:v=> yPct? v+"%" : (Math.abs(v)>=1000? "R$"+(v/1000)+"k" : v)}, grid:{color:"rgba(243,239,229,0.10)"}, beginAtZero:true } } } });
 }
 function buildMetasChart(){
   if(!_fin || !_fin.meses.length || typeof Chart==="undefined") return;
@@ -620,35 +668,35 @@ function buildMetasChart(){
   const { fm, meses, meta }=_fin; destroyChart("finChart");
   _charts["finChart"]=new Chart(ctx,{ data:{ labels:meses.map(mesLabel),
       datasets:[
-        { type:"bar", label:"Faturamento", data:meses.map(k=>parseFloat(fm[k].faturamento)||0), backgroundColor:"rgba(255,30,61,.55)", borderColor:"#FF1E3D", borderWidth:1, borderRadius:4 },
-        { type:"line", label:"Meta", data:meses.map(()=>meta||0), borderColor:"#4ADE80", borderDash:[6,4], borderWidth:2, pointRadius:0, fill:false } ]},
+        { type:"bar", label:"Faturamento", data:meses.map(k=>parseFloat(fm[k].faturamento)||0), backgroundColor:"rgba(243,239,229,.82)", borderColor:"#F3EFE5", borderWidth:0, borderRadius:0 },
+        { type:"line", label:"Meta", data:meses.map(()=>meta||0), borderColor:"#E5322B", borderDash:[5,4], borderWidth:2, pointRadius:0, fill:false } ]},
     options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ labels:{color:"#A1A1AA",font:{family:"Cairo"}} } },
-      scales:{ x:{ ticks:{color:"#71717A"}, grid:{color:"#2B2B2E"} },
-        y:{ ticks:{color:"#71717A",callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"#2B2B2E"}, beginAtZero:true } } } });
+      plugins:{ legend:{ labels:{color:"#9A9384",font:{family:"Inter"}} } },
+      scales:{ x:{ ticks:{color:"#6E685C"}, grid:{color:"rgba(243,239,229,0.10)"} },
+        y:{ ticks:{color:"#6E685C",callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"rgba(243,239,229,0.10)"}, beginAtZero:true } } } });
 }
 function buildVisaoCharts(){
   if(!_series) return; const s=_series;
   const ctxF=document.getElementById("vFat");
   if(ctxF&&s.months.length){ destroyChart("vFat");
     _charts["vFat"]=new Chart(ctxF,{ data:{ labels:s.months, datasets:[
-      { type:"bar", label:"Faturamento", data:s.fatByMonth, backgroundColor:"rgba(255,30,61,.55)", borderColor:"#FF1E3D", borderWidth:1, borderRadius:4 },
-      { type:"line", label:"Meta", data:s.months.map(()=>s.meta||0), borderColor:"#4ADE80", borderDash:[6,4], borderWidth:2, pointRadius:0, fill:false } ]},
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{color:"#A1A1AA",font:{family:"Cairo"}} } },
-        scales:{ x:{ ticks:{color:"#71717A"}, grid:{color:"#2B2B2E"} }, y:{ ticks:{color:"#71717A",callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"#2B2B2E"}, beginAtZero:true } } } }); }
-  mkLine("vMargem", s.labels, [{label:"Margem",data:s.margem,borderColor:"#4ADE80",backgroundColor:"rgba(74,222,128,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
-  mkLine("vOcup", s.labels, [{label:"Ocupação",data:s.ocup,borderColor:"#5cc8ff",backgroundColor:"rgba(92,200,255,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
-  mkLine("vConv", s.labels, [{label:"Conversão",data:s.conv,borderColor:"#FBBF24",backgroundColor:"rgba(251,191,36,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
-  mkLine("vMrr", s.labels, [{label:"MRR",data:s.mrr,borderColor:"#FF1E3D",backgroundColor:"rgba(255,30,61,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], false);
+      { type:"bar", label:"Faturamento", data:s.fatByMonth, backgroundColor:"rgba(243,239,229,.82)", borderColor:"#F3EFE5", borderWidth:0, borderRadius:0 },
+      { type:"line", label:"Meta", data:s.months.map(()=>s.meta||0), borderColor:"#E5322B", borderDash:[5,4], borderWidth:2, pointRadius:0, fill:false } ]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{color:"#9A9384",font:{family:"Inter"}} } },
+        scales:{ x:{ ticks:{color:"#6E685C"}, grid:{color:"rgba(243,239,229,0.10)"} }, y:{ ticks:{color:"#6E685C",callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"rgba(243,239,229,0.10)"}, beginAtZero:true } } } }); }
+  mkLine("vMargem", s.labels, [{label:"Margem",data:s.margem,borderColor:"#F3EFE5",backgroundColor:"rgba(243,239,229,.10)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
+  mkLine("vOcup", s.labels, [{label:"Ocupação",data:s.ocup,borderColor:"#F3EFE5",backgroundColor:"rgba(243,239,229,.10)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
+  mkLine("vConv", s.labels, [{label:"Conversão",data:s.conv,borderColor:"#F3EFE5",backgroundColor:"rgba(243,239,229,.10)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], true);
+  mkLine("vMrr", s.labels, [{label:"MRR",data:s.mrr,borderColor:"#E5322B",backgroundColor:"rgba(229,50,43,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], false);
 }
 function buildEvolucaoCharts(){
   if(!_mat) return;
   const ctx=document.getElementById("evRadar");
   if(ctx&&typeof Chart!=="undefined"){ destroyChart("evRadar");
     const dims=Object.keys(MAT_LBL); const labels=dims.map(k=>MAT_LBL[k]); const vals=dims.map(k=>_mat.dims[k].val!=null?_mat.dims[k].val:0);
-    _charts["evRadar"]=new Chart(ctx,{ type:"radar", data:{ labels, datasets:[{ label:"Maturidade", data:vals, borderColor:"#FF1E3D", backgroundColor:"rgba(255,30,61,.18)", borderWidth:2, pointBackgroundColor:"#FF1E3D" }] },
+    _charts["evRadar"]=new Chart(ctx,{ type:"radar", data:{ labels, datasets:[{ label:"Maturidade", data:vals, borderColor:"#E5322B", backgroundColor:"rgba(229,50,43,.18)", borderWidth:2, pointBackgroundColor:"#E5322B" }] },
       options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
-        scales:{ r:{ min:0, max:10, ticks:{stepSize:2,color:"#71717A",backdropColor:"transparent"}, grid:{color:"#2B2B2E"}, angleLines:{color:"#2B2B2E"}, pointLabels:{color:"#A1A1AA",font:{family:"Cairo",size:12}} } } } }); }
+        scales:{ r:{ min:0, max:10, ticks:{stepSize:2,color:"#6E685C",backdropColor:"transparent"}, grid:{color:"rgba(243,239,229,0.10)"}, angleLines:{color:"rgba(243,239,229,0.10)"}, pointLabels:{color:"#9A9384",font:{family:"Cairo",size:12}} } } } }); }
   if(_series && _series.matOverall.filter(x=>x!=null).length>1)
     mkLine("evLine", _series.labels, [{label:"Maturidade geral",data:_series.matOverall,borderColor:"#4ADE80",backgroundColor:"rgba(74,222,128,.12)",borderWidth:2,tension:.3,fill:true,pointRadius:3,spanGaps:true}], false);
 }
