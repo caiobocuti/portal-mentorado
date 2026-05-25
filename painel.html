@@ -7,22 +7,24 @@
 <title>Painel do Mentor · Publi Advisor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#0B0B0C; --surface:#161617; --surface-alt:#1E1E20;
-  --border:#2B2B2E; --border-strong:#3C3C40;
-  --text:#F4F4F5; --text-muted:#A1A1AA; --text-faint:#71717A;
-  --accent:#FF1E3D; --accent-soft:#2B0D12; --ink:#FF1E3D;
-  --green:#4ADE80; --green-soft:#12251A;
-  --amber:#FBBF24; --amber-soft:#2A220A;
+  --bg:#0E0D0B; --surface:#141310; --surface-alt:#1B1916;
+  --border:rgba(243,239,229,.14); --border-strong:rgba(243,239,229,.30);
+  --text:#F3EFE5; --text-muted:#9A9384; --text-faint:#6E685C;
+  --accent:#E5322B; --accent-soft:#2A0F0D; --ink:#E5322B;
+  --green:#8FB069; --green-soft:#16210F;
+  --amber:#D9A441; --amber-soft:#241B0A;
+  --off:#F3EFE5; --ink-on-off:#141210;
+  --serif:'Fraunces',Georgia,serif; --mono:'Space Mono','SFMono-Regular',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family:"Cairo",-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Helvetica,Arial,sans-serif;
-  background:radial-gradient(1200px 600px at 80% -10%, #19090c 0%, transparent 60%), var(--bg);
-  color:var(--text); min-height:100vh; line-height:1.5; letter-spacing:.01em;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text); min-height:100vh; line-height:1.55;
 }
 input{color:var(--text);font-family:inherit}
 input::placeholder{color:var(--text-faint);opacity:1}
@@ -162,6 +164,23 @@ table.hist td{padding:8px;border-bottom:1px solid var(--border)}
 @media(max-width:600px){.eform{grid-template-columns:1fr 1fr}}
 @media(max-width:760px){.summary{grid-template-columns:1fr 1fr}.mgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.summary{grid-template-columns:1fr 1fr}.mgrid{grid-template-columns:1fr}}
+
+/* ===================== EDITORIAL SKIN (preto + off-white + vermelho) ===================== */
+.login-card h1,.topbar h1,.sum-card .v,.card-top .nome,.kpi .val,.modal-hdr h2,.mbox .n{font-family:var(--serif);font-weight:500;letter-spacing:-.01em}
+.topbar h1{font-size:26px} .modal-hdr h2{font-size:24px} .sum-card .v{font-size:30px} .card-top .nome{font-size:18px} .mbox .n{font-weight:500}
+.brand,.field label,.sum-card .k,.kpi .lbl,.sect h3,.mbox .l,.pill,.tstatus,.ef label,table.hist th,.muda .lbl,.card-top .meta{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em}
+.field label,.sum-card .k,.kpi .lbl,.mbox .l,.ef label{color:var(--text-faint);font-weight:400;font-size:10px}
+.sect h3{color:var(--text-muted);font-weight:400;letter-spacing:.16em}
+.card-top .meta{letter-spacing:.06em;font-size:10px}
+/* cantos retos + superfícies planas */
+.login-card,.sum-card,.card,.modal,.mbox,.chart-wrap,.titem,.etask,.muda .row,.alert-flag,.field input,.btn-main,.btn-ghost,.eform input,.ef input,.etask select,.x,.taskbar,.pill,table.hist{border-radius:2px}
+.taskbar>span{background:var(--text)}
+.card:hover{transform:none;border-color:var(--accent)}
+/* login editorial */
+.login-wrap{background:var(--bg)}
+.login-card{box-shadow:none;border-color:var(--border)}
+.login-card .brand,.topbar .brand{color:var(--text-faint);font-weight:400;font-family:var(--mono);letter-spacing:.22em;font-size:10.5px}
+.btn-main{background:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-weight:400;font-size:12px}
 </style>
 </head>
 <body>
@@ -526,16 +545,16 @@ function openModal(code){
       data:{ labels:histMeses.map(mesLabel),
         datasets:[
           {label:"Faturamento", data:histMeses.map(k=>parseFloat(fm[k].faturamento)||0),
-           borderColor:"#FF1E3D", backgroundColor:"rgba(255,30,61,.12)", fill:true, tension:.3, yAxisID:"y"},
+           borderColor:"#F3EFE5", backgroundColor:"rgba(243,239,229,.10)", fill:true, tension:.3, yAxisID:"y"},
           {label:"Margem %", data:histMeses.map(k=>parseFloat(fm[k].margem)||0),
-           borderColor:"#4ADE80", backgroundColor:"transparent", tension:.3, yAxisID:"y1"}
+           borderColor:"#E5322B", backgroundColor:"transparent", tension:.3, yAxisID:"y1"}
         ]},
       options:{ responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:"#A1A1AA", font:{family:"Cairo"} } } },
+        plugins:{ legend:{ labels:{ color:"#9A9384", font:{family:"Inter"} } } },
         scales:{
-          x:{ ticks:{color:"#71717A"}, grid:{color:"#2B2B2E"} },
-          y:{ position:"left", ticks:{color:"#71717A", callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"#2B2B2E"} },
-          y1:{ position:"right", ticks:{color:"#4ADE80", callback:v=>v+"%"}, grid:{drawOnChartArea:false} }
+          x:{ ticks:{color:"#6E685C"}, grid:{color:"rgba(243,239,229,0.10)"} },
+          y:{ position:"left", ticks:{color:"#6E685C", callback:v=>"R$"+(v/1000)+"k"}, grid:{color:"rgba(243,239,229,0.10)"} },
+          y1:{ position:"right", ticks:{color:"#E5322B", callback:v=>v+"%"}, grid:{drawOnChartArea:false} }
         } }
     });
   }
