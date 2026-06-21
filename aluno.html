@@ -345,6 +345,10 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
 .login-right .field input:focus{outline:none;border-bottom-color:var(--accent)}
 .login-right .btn-main{background:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.16em;font-weight:400;font-size:12px;border-radius:0;padding:15px}
 .login-right .hint{text-align:left}
+.login-alt{margin-top:22px;text-align:center}
+.login-alt .link{background:none;border:none;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:11px;cursor:pointer;padding:6px 4px}
+.login-alt .link:hover{color:var(--text)}
+.login-err.ok{background:var(--green-soft);border-color:var(--green);color:var(--green)}
 @media(max-width:780px){.login-wrap{grid-template-columns:1fr}.login-left{display:none}}
 </style>
 </head>
@@ -358,14 +362,31 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
     <div class="login-foot"><span>Estratégia · Números · Direção</span><span>Edição 2026</span></div>
   </div>
   <div class="login-right">
-    <div class="brand">Entrar no portal</div>
-    <div id="loginErr" class="login-err hidden"></div>
-    <div class="field"><label>E-mail da produtora</label>
-      <input type="email" id="email" placeholder="voce@suaprodutora.com" autocomplete="username"></div>
-    <div class="field"><label>Senha</label>
-      <input type="password" id="password" placeholder="sua senha" autocomplete="current-password"></div>
-    <button class="btn-main" id="loginBtn">Entrar →</button>
-    <div class="hint">Use o e-mail e a senha que seu mentor enviou. Acesso individual e privado da sua produtora.</div>
+    <div id="loginPanel">
+      <div class="brand">Entrar no portal</div>
+      <div id="loginErr" class="login-err hidden"></div>
+      <div class="field"><label>E-mail da produtora</label>
+        <input type="email" id="email" placeholder="voce@suaprodutora.com" autocomplete="username"></div>
+      <div class="field"><label>Senha</label>
+        <input type="password" id="password" placeholder="sua senha" autocomplete="current-password"></div>
+      <button class="btn-main" id="loginBtn">Entrar →</button>
+      <div class="hint">Use o e-mail e a senha que seu mentor enviou. Acesso individual e privado da sua produtora.</div>
+      <div class="login-alt"><button type="button" class="link" id="toggleChange">Mudar minha senha →</button></div>
+    </div>
+    <div id="changePanel" class="hidden">
+      <div class="brand">Mudar minha senha</div>
+      <div id="changeErr" class="login-err hidden"></div>
+      <div class="field"><label>E-mail da produtora</label>
+        <input type="email" id="chgEmail" placeholder="voce@suaprodutora.com" autocomplete="username"></div>
+      <div class="field"><label>Senha atual</label>
+        <input type="password" id="chgCurrent" placeholder="senha que você usa hoje" autocomplete="current-password"></div>
+      <div class="field"><label>Nova senha (mín. 6 caracteres)</label>
+        <input type="password" id="chgNew" placeholder="escolha uma nova senha" autocomplete="new-password"></div>
+      <div class="field"><label>Confirmar nova senha</label>
+        <input type="password" id="chgConfirm" placeholder="repita a nova senha" autocomplete="new-password"></div>
+      <button class="btn-main" id="chgBtn">Salvar nova senha</button>
+      <div class="login-alt"><button type="button" class="link" id="toggleBackLogin">← Voltar pro login</button></div>
+    </div>
   </div>
 </div>
 
@@ -1295,6 +1316,45 @@ document.getElementById("loginBtn").addEventListener("click", async ()=>{
   finally{ btn.disabled=false; btn.textContent="Entrar"; }
 });
 document.getElementById("password").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("loginBtn").click(); });
+
+// ===== Mudar minha senha (sem depender de e-mail) =====
+function showLoginPanel(){ document.getElementById("changePanel").classList.add("hidden"); document.getElementById("loginPanel").classList.remove("hidden"); }
+function showChangePanel(){ document.getElementById("loginPanel").classList.add("hidden"); document.getElementById("changePanel").classList.remove("hidden"); const e=document.getElementById("email").value; if(e) document.getElementById("chgEmail").value=e; }
+document.getElementById("toggleChange").addEventListener("click", showChangePanel);
+document.getElementById("toggleBackLogin").addEventListener("click", showLoginPanel);
+document.getElementById("chgBtn").addEventListener("click", async ()=>{
+  const btn=document.getElementById("chgBtn"), msg=document.getElementById("changeErr");
+  const email=document.getElementById("chgEmail").value.trim();
+  const cur=document.getElementById("chgCurrent").value;
+  const nw=document.getElementById("chgNew").value;
+  const cf=document.getElementById("chgConfirm").value;
+  function err(t){ msg.textContent=t; msg.className="login-err"; }
+  msg.className="login-err hidden"; msg.textContent="";
+  if(!email||!cur||!nw||!cf){ err("Preencha todos os campos."); return; }
+  if(nw.length<6){ err("A nova senha precisa ter pelo menos 6 caracteres."); return; }
+  if(nw!==cf){ err("A nova senha e a confirmação não batem."); return; }
+  if(nw===cur){ err("A nova senha precisa ser diferente da atual."); return; }
+  btn.disabled=true; btn.textContent="Salvando...";
+  try{
+    const r1=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,password:cur})});
+    const j1=await r1.json();
+    if(!r1.ok){ throw new Error(j1.error_description || j1.msg || j1.error || "Senha atual incorreta."); }
+    const tok=j1.access_token;
+    const r2=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{apikey:SUPABASE_ANON_KEY,"Authorization":"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify({password:nw})});
+    const j2=await r2.json();
+    if(!r2.ok){ throw new Error(j2.msg || j2.error_description || j2.message || "Não foi possível atualizar a senha."); }
+    try{ await fetch(SUPABASE_URL+"/auth/v1/logout",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,"Authorization":"Bearer "+tok}}); }catch(e){}
+    document.getElementById("chgCurrent").value=""; document.getElementById("chgNew").value=""; document.getElementById("chgConfirm").value="";
+    showLoginPanel();
+    const le=document.getElementById("loginErr");
+    le.textContent="Senha alterada! Entre com a nova senha."; le.className="login-err ok";
+    document.getElementById("email").value=email;
+    setTimeout(()=>document.getElementById("password").focus(), 80);
+  }catch(e){ err(e.message||"Erro ao alterar a senha."); }
+  finally{ btn.disabled=false; btn.textContent="Salvar nova senha"; }
+});
+document.getElementById("chgConfirm").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("chgBtn").click(); });
+
 document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
 document.getElementById("logoutBtn").addEventListener("click", doLogout);
 
