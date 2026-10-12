@@ -350,6 +350,51 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
 .login-alt .link:hover{color:var(--text)}
 .login-err.ok{background:var(--green-soft);border-color:var(--green);color:var(--green)}
 @media(max-width:780px){.login-wrap{grid-template-columns:1fr}.login-left{display:none}}
+/* ===== Aulas gravadas (curso em vídeo) ===== */
+.course-wrap{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+.course-progress{margin-bottom:20px}
+.course-progress .cp-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--text-muted);margin-bottom:7px}
+.course-progress .cp-top b{color:var(--text);font-weight:800}
+.cp-bar{height:8px;border-radius:99px;background:var(--surface-alt);overflow:hidden}
+.cp-bar>span{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .35s}
+.course-player{background:#000;border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;aspect-ratio:16/9}
+.course-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.course-player .cp-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-faint);font-size:14px;text-align:center;padding:24px}
+.course-now{margin-top:17px}
+.course-now .cn-mod{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.course-now h2{font-size:21px;font-weight:900;margin:5px 0 9px;line-height:1.2}
+.course-now .cn-desc{font-size:14px;line-height:1.7;color:var(--text-muted)}
+.course-now .cn-actions{margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.cn-mark{background:var(--ink);color:#fff;border:none;border-radius:9px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.cn-mark:hover{filter:brightness(1.08)}
+.cn-mark.done{background:var(--green-soft);color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.course-list{display:flex;flex-direction:column;gap:18px}
+.cl-mod .clm-h{font-size:12.5px;font-weight:800;letter-spacing:.01em;color:var(--text);margin-bottom:9px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.cl-mod .clm-h small{color:var(--text-faint);font-weight:600;font-family:var(--mono);font-size:11px}
+.cl-item{display:flex;gap:11px;align-items:center;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;margin-bottom:7px;transition:border-color .15s,background .15s}
+.cl-item:hover{border-color:var(--border-strong)}
+.cl-item.active{border-color:var(--accent);background:var(--accent-soft)}
+.cl-tick{width:20px;height:20px;border-radius:50%;border:2px solid var(--border-strong);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;transition:all .15s}
+.cl-item.done .cl-tick{background:var(--green);border-color:var(--green);color:#0E0D0B}
+.cl-meta{min-width:0;flex:1}
+.cl-meta .clt{font-size:13.5px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-meta .cld{font-size:11px;color:var(--text-faint);font-family:var(--mono);margin-top:2px}
+.cl-item.active .clt{color:var(--accent)}
+.course-empty{text-align:center;padding:52px 20px;color:var(--text-faint)}
+.course-empty .ce-ic{font-size:36px;margin-bottom:12px}
+/* editor de aulas (mentor) */
+.ck-mod{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;background:var(--surface)}
+.ck-modhd{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.ck-lesson{border:1px dashed var(--border-strong);border-radius:10px;padding:12px;margin:11px 0;background:var(--bg)}
+.ck-lrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ck-f{width:100%;background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-family:inherit;font-size:13.5px;margin-top:7px}
+.ck-lrow .ck-f{flex:1;min-width:130px;margin-top:0}
+textarea.ck-f{min-height:56px;resize:vertical;line-height:1.5}
+.ck-f:focus{outline:none;border-color:var(--accent)}
+.ck-x{background:transparent;border:1px solid var(--border);color:var(--text-muted);border-radius:7px;width:34px;height:34px;cursor:pointer;flex-shrink:0;font-size:14px}
+.ck-x:hover{border-color:var(--accent);color:var(--accent)}
+.ck-hint{font-size:11.5px;color:var(--text-faint);margin-top:5px}
+@media(max-width:820px){ .course-wrap{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -401,6 +446,7 @@ ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;heig
     </div>
     <nav class="side-nav" id="sideNav">
       <button data-view="visao" class="active"><span class="ic">▣</span> Visão geral</button>
+      <button data-view="curso"><span class="ic">🎬</span> Aulas gravadas</button>
       <button data-view="atualizar"><span class="ic">✎</span> Atualizar meus dados</button>
       <button data-view="kpis"><span class="ic">◉</span> Indicadores</button>
       <button data-view="metas"><span class="ic">▥</span> Metas & faturamento</button>
@@ -1243,11 +1289,170 @@ async function saveContent(){
     else if(a==="save"){ saveContent(); } });
 })();
 
+// ===== AULAS GRAVADAS (curso em vídeo — conteúdo GLOBAL, igual pra todas as produtoras) =====
+let COURSE=null;      // { modulos:[ {id,titulo,desc,aulas:[{id,titulo,vimeo,dur,desc}]} ] }
+let _courseSel=null;  // {mi,li} aula selecionada no player
+let _courseEdit=null; // clone em edição (mentor)
+
+function courseIsMentor(){ try{ return isMentorMode() || ((getSession()||{}).email===MENTOR_EMAIL); }catch(e){ return false; } }
+function courseDoneKey(){ return "pa-curso-done:"+(MENTEE_CODE||"anon"); }
+function courseGetDone(){ try{ return new Set(JSON.parse(localStorage.getItem(courseDoneKey())||"[]")); }catch(e){ return new Set(); } }
+function courseSetDone(set){ try{ localStorage.setItem(courseDoneKey(), JSON.stringify([...set])); }catch(e){} }
+
+// Aceita: ID puro (123456789), vimeo.com/123, vimeo.com/123/hash (privado), player.vimeo.com/video/123?h=hash
+function vimeoEmbed(raw){
+  if(!raw) return null;
+  const s=String(raw).trim(); let h=null, id=null;
+  const hm=s.match(/[?&]h=([a-zA-Z0-9]+)/); if(hm) h=hm[1];
+  const m=s.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/([a-zA-Z0-9]+))?/);
+  if(m){ id=m[1]; if(m[2]&&!h) h=m[2]; } else if(/^\d+$/.test(s)) id=s;
+  if(!id) return null;
+  return "https://player.vimeo.com/video/"+id+(h?("?h="+h):"");
+}
+
+async function loadCourse(force){
+  if(COURSE && !force) return COURSE;
+  try{
+    let token=_authToken; if(!token){ const s=await validToken(); token=s&&s.access_token; }
+    const r=await fetch(SUPABASE_URL+"/rest/v1/course?id=eq.1&select=data",{ headers:{ "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer "+token } });
+    if(r.ok){ const j=await r.json(); COURSE=(j&&j[0]&&j[0].data)||{modulos:[]}; } else COURSE={modulos:[]};
+  }catch(e){ COURSE={modulos:[]}; }
+  if(!COURSE.modulos) COURSE.modulos=[];
+  return COURSE;
+}
+function courseAllLessons(){ const out=[]; (COURSE.modulos||[]).forEach((m,mi)=>(m.aulas||[]).forEach((a,li)=>out.push({m,a,mi,li}))); return out; }
+
+// ---- tela do aluno ----
+function buildCourseView(){ return '<div id="courseRoot"><div class="loading">Carregando aulas…</div></div>'; }
+async function afterCourseView(){
+  await loadCourse();
+  const all=courseAllLessons();
+  if(all.length){ const done=courseGetDone(); const pick=all.find(x=>!done.has(x.a.id))||all[0]; _courseSel={mi:pick.mi,li:pick.li}; }
+  else _courseSel=null;
+  renderCourse();
+}
+function renderCourse(){
+  const root=document.getElementById("courseRoot"); if(!root) return;
+  const mods=COURSE.modulos||[], all=courseAllLessons();
+  const editBtn = courseIsMentor() ? '<button class="cn-mark" style="background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)" onclick="showView(\'editarcurso\')">✏️ Editar aulas</button>' : '';
+  if(!all.length){
+    root.innerHTML='<div class="course-empty"><div class="ce-ic">🎬</div><div>As aulas gravadas ainda não foram publicadas.<br>Assim que as gravações forem enviadas, elas aparecem aqui.</div>'+(editBtn?('<div style="margin-top:18px">'+editBtn+'</div>'):'')+'</div>';
+    return;
+  }
+  const done=courseGetDone();
+  const doneCount=all.filter(x=>done.has(x.a.id)).length, pct=Math.round(doneCount/all.length*100);
+  const sel=_courseSel?(mods[_courseSel.mi]&&mods[_courseSel.mi].aulas&&mods[_courseSel.mi].aulas[_courseSel.li]):null;
+  const selMod=_courseSel?mods[_courseSel.mi]:null;
+  const embed=sel?vimeoEmbed(sel.vimeo):null;
+  const player=embed
+    ? '<div class="course-player"><iframe src="'+embed+'" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>'
+    : '<div class="course-player"><div class="cp-empty">'+(sel?'Vídeo ainda não configurado para esta aula.':'Selecione uma aula ao lado para começar.')+'</div></div>';
+  const isDone=sel&&done.has(sel.id);
+  const now=sel?(
+    '<div class="course-now"><div class="cn-mod">'+esc((selMod&&selMod.titulo)||'')+'</div><h2>'+esc(sel.titulo||'Aula')+'</h2>'
+    +(sel.desc?'<div class="cn-desc">'+esc(sel.desc)+'</div>':'')
+    +'<div class="cn-actions"><button class="cn-mark'+(isDone?' done':'')+'" data-course-toggle="'+esc(sel.id)+'">'+(isDone?'✓ Assistida':'Marcar como assistida')+'</button>'+editBtn+'</div></div>'
+  ):'';
+  const list=mods.map((m,mi)=>{
+    const items=(m.aulas||[]).map((a,li)=>{
+      const active=_courseSel&&_courseSel.mi===mi&&_courseSel.li===li;
+      return '<div class="cl-item'+(active?' active':'')+(done.has(a.id)?' done':'')+'" data-course-play="'+mi+'-'+li+'" data-lesson-id="'+esc(a.id)+'"><div class="cl-tick">✓</div><div class="cl-meta"><div class="clt">'+esc(a.titulo||'Aula')+'</div>'+(a.dur?'<div class="cld">'+esc(a.dur)+'</div>':'')+'</div></div>';
+    }).join('')||'<div style="color:var(--text-faint);font-size:12.5px;padding:2px 2px 4px">Sem aulas neste módulo.</div>';
+    const mdone=(m.aulas||[]).filter(a=>done.has(a.id)).length;
+    return '<div class="cl-mod" data-mi="'+mi+'"><div class="clm-h"><span>'+esc(m.titulo||'Módulo')+'</span><small>'+mdone+'/'+((m.aulas||[]).length)+'</small></div>'+items+'</div>';
+  }).join('');
+  root.innerHTML=
+    '<div class="course-progress"><div class="cp-top"><span>Seu progresso</span><span class="cp-count"><b>'+doneCount+'</b> de '+all.length+' aulas · '+pct+'%</span></div><div class="cp-bar"><span style="width:'+pct+'%"></span></div></div>'
+    +'<div class="course-wrap"><div class="course-main">'+player+now+'</div><div class="course-list">'+list+'</div></div>';
+}
+// Atualiza progresso/ticks sem recarregar o vídeo
+function courseRefreshDoneUI(){
+  const done=courseGetDone(), all=courseAllLessons();
+  document.querySelectorAll("#courseRoot .cl-item").forEach(el=>{ el.classList.toggle("done", done.has(el.dataset.lessonId)); });
+  (COURSE.modulos||[]).forEach((m,mi)=>{ const s=document.querySelector('#courseRoot .cl-mod[data-mi="'+mi+'"] small'); if(s) s.textContent=(m.aulas||[]).filter(a=>done.has(a.id)).length+'/'+((m.aulas||[]).length); });
+  const dc=all.filter(x=>done.has(x.a.id)).length, pct=all.length?Math.round(dc/all.length*100):0;
+  const b=document.querySelector("#courseRoot .cp-bar>span"); if(b) b.style.width=pct+"%";
+  const c=document.querySelector("#courseRoot .cp-count"); if(c) c.innerHTML='<b>'+dc+'</b> de '+all.length+' aulas · '+pct+'%';
+}
+document.getElementById("viewContainer").addEventListener("click", e=>{
+  const p=e.target.closest("[data-course-play]");
+  if(p){ const a=p.dataset.coursePlay.split("-"); _courseSel={mi:+a[0],li:+a[1]}; renderCourse(); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  const t=e.target.closest("[data-course-toggle]");
+  if(t){ const id=t.dataset.courseToggle, set=courseGetDone(); const nd=!set.has(id); if(nd)set.add(id); else set.delete(id); courseSetDone(set); t.classList.toggle("done",nd); t.innerHTML=nd?'✓ Assistida':'Marcar como assistida'; courseRefreshDoneUI(); return; }
+});
+
+// ---- editor do mentor ----
+function buildCourseEditor(){ return '<div id="courseEditRoot"><div class="loading">Carregando…</div></div>'; }
+async function renderCourseEditor(){ await loadCourse(); _courseEdit=JSON.parse(JSON.stringify(COURSE||{modulos:[]})); if(!_courseEdit.modulos)_courseEdit.modulos=[]; paintCourseEditor(); }
+function courseNewId(pfx){ return pfx+Math.random().toString(36).slice(2,8)+(Date.now()%100000); }
+function paintCourseEditor(){
+  const root=document.getElementById("courseEditRoot"); if(!root) return;
+  const mods=_courseEdit.modulos||[];
+  const body=mods.map((m,mi)=>{
+    const lessons=(m.aulas||[]).map((a,li)=>(
+      '<div class="ck-lesson"><div class="ck-lrow">'
+      +'<input class="ck-f" data-ck="lf" data-mi="'+mi+'" data-li="'+li+'" data-f="titulo" placeholder="Título da aula" value="'+esc(a.titulo||'')+'">'
+      +'<input class="ck-f" style="max-width:140px" data-ck="lf" data-mi="'+mi+'" data-li="'+li+'" data-f="dur" placeholder="Duração (12:34)" value="'+esc(a.dur||'')+'">'
+      +'<button class="ck-x" data-ck="ldel" data-mi="'+mi+'" data-li="'+li+'" title="Remover aula">🗑</button></div>'
+      +'<input class="ck-f" data-ck="lf" data-mi="'+mi+'" data-li="'+li+'" data-f="vimeo" placeholder="Link ou ID do Vimeo — ex.: https://vimeo.com/123456789" value="'+esc(a.vimeo||'')+'">'
+      +'<div class="ck-hint">Cole o link do Vimeo ou só o número do ID. Vídeo privado/oculto: cole o link completo (com o código depois da barra).</div>'
+      +'<textarea class="ck-f" data-ck="lf" data-mi="'+mi+'" data-li="'+li+'" data-f="desc" placeholder="Descrição da aula (opcional)">'+esc(a.desc||'')+'</textarea>'
+      +'</div>'
+    )).join('');
+    return '<div class="ck-mod"><div class="ck-modhd">'
+      +'<input class="ck-f" style="font-weight:800;margin-top:0" data-ck="mf" data-mi="'+mi+'" data-f="titulo" placeholder="Título do módulo (ex.: Módulo 1 — Fundamentos)" value="'+esc(m.titulo||'')+'">'
+      +'<button class="ck-x" data-ck="mup" data-mi="'+mi+'" title="Subir módulo">↑</button>'
+      +'<button class="ck-x" data-ck="mdown" data-mi="'+mi+'" title="Descer módulo">↓</button>'
+      +'<button class="ck-x" data-ck="mdel" data-mi="'+mi+'" title="Remover módulo">🗑</button></div>'
+      +'<input class="ck-f" data-ck="mf" data-mi="'+mi+'" data-f="desc" placeholder="Descrição curta do módulo (opcional)" value="'+esc(m.desc||'')+'">'
+      +lessons
+      +'<button class="okr-addobj" style="margin-top:11px" data-ck="ladd" data-mi="'+mi+'">+ Adicionar aula</button></div>';
+  }).join('');
+  root.innerHTML=
+    '<div class="note" style="margin:0 0 16px;color:var(--text-muted)">Estas aulas são <b>globais</b>: aparecem iguais para todas as produtoras na aba <b>Aulas gravadas</b>. As alterações valem para todos os mentorados.</div>'
+    +(body||'<div style="color:var(--text-faint);font-size:13.5px;margin-bottom:10px">Nenhum módulo ainda. Clique abaixo para criar o primeiro.</div>')
+    +'<button class="okr-addobj" data-ck="madd">+ Adicionar módulo</button>'
+    +'<div class="save-bar"><button data-ck="csave">Salvar aulas</button><span id="ckMsg" class="save-msg"></span></div>';
+}
+(function(){
+  const vc=document.getElementById("viewContainer"); if(!vc) return;
+  const upd=e=>{ const t=e.target; if(!t||!t.dataset||!t.dataset.ck||!_courseEdit) return; const a=t.dataset.ck;
+    if(a==="mf"){ const m=_courseEdit.modulos[+t.dataset.mi]; if(m) m[t.dataset.f]=t.value; }
+    else if(a==="lf"){ const m=_courseEdit.modulos[+t.dataset.mi], l=m&&m.aulas&&m.aulas[+t.dataset.li]; if(l) l[t.dataset.f]=t.value; } };
+  vc.addEventListener("input", upd);
+  vc.addEventListener("click", e=>{ const b=e.target.closest("[data-ck]"); if(!b||!_courseEdit) return; const a=b.dataset.ck, mi=+b.dataset.mi, li=+b.dataset.li, mods=_courseEdit.modulos;
+    if(a==="madd"){ mods.push({id:courseNewId("m"),titulo:"",desc:"",aulas:[]}); paintCourseEditor(); }
+    else if(a==="mdel"){ if(confirm("Remover este módulo e todas as suas aulas?")){ mods.splice(mi,1); paintCourseEditor(); } }
+    else if(a==="mup"){ if(mi>0){ const x=mods.splice(mi,1)[0]; mods.splice(mi-1,0,x); paintCourseEditor(); } }
+    else if(a==="mdown"){ if(mi<mods.length-1){ const x=mods.splice(mi,1)[0]; mods.splice(mi+1,0,x); paintCourseEditor(); } }
+    else if(a==="ladd"){ const m=mods[mi]; m.aulas=m.aulas||[]; m.aulas.push({id:courseNewId("l"),titulo:"",vimeo:"",dur:"",desc:""}); paintCourseEditor(); }
+    else if(a==="ldel"){ const m=mods[mi]; if(m&&m.aulas){ m.aulas.splice(li,1); paintCourseEditor(); } }
+    else if(a==="csave"){ saveCourse(); } });
+})();
+async function saveCourse(){
+  const msg=document.getElementById("ckMsg"), btn=document.querySelector('[data-ck="csave"]');
+  let token=null; const mv=await mentorValidToken(); if(mv) token=mv.access_token;
+  else { const s=await validToken(); if(s&&s.email===MENTOR_EMAIL) token=s.access_token; }
+  if(!token){ if(msg){msg.textContent="Você precisa estar logado como mentor para salvar.";msg.className="save-msg err";} return; }
+  if(msg){msg.textContent="";} if(btn){btn.disabled=true;btn.textContent="Salvando...";}
+  try{
+    const r=await fetch(SUPABASE_URL+"/rest/v1/course?on_conflict=id",{ method:"POST",
+      headers:{ "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer "+token, "Content-Type":"application/json", "Prefer":"resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({ id:1, data:_courseEdit, updated_at:new Date().toISOString() }) });
+    if(!r.ok){ const t=await r.text(); throw new Error("HTTP "+r.status+" "+t.slice(0,140)); }
+    COURSE=JSON.parse(JSON.stringify(_courseEdit)); if(!COURSE.modulos)COURSE.modulos=[];
+    if(msg){msg.textContent="Aulas salvas! Já valem para todos os mentorados.";msg.className="save-msg ok";}
+    if(btn){btn.disabled=false;btn.textContent="Salvar aulas";}
+  }catch(e){ if(msg){msg.textContent="Erro ao salvar: "+e.message;msg.className="save-msg err";} if(btn){btn.disabled=false;btn.textContent="Salvar aulas";} }
+}
+
 const VIEW_INDEX = { visao:"01", atualizar:"02", kpis:"03", metas:"04", evolucao:"05", alavancas:"06", comercial:"07", plano:"08", aprendizado:"09", direcao:"10", materiais:"11" };
 function showView(name){
   _lastView = name;
   let title, sub, body;
   if(name==="editarconteudo"){ title="Editar conteúdo"; sub="Estratégia e diagnóstico desta produtora — salva direto pra ela"; _ce=JSON.parse(JSON.stringify((CURRENT&&CURRENT.content)||{})); body=buildContentEditor(); }
+  else if(name==="curso"){ title="Aulas gravadas"; sub="As gravações das aulas da mentoria — assista no seu ritmo"; body=buildCourseView(); }
+  else if(name==="editarcurso"){ title="Editar aulas gravadas"; sub="Monte os módulos e as aulas em vídeo — vale para todos os mentorados"; body=buildCourseEditor(); }
   else { const t=VIEW_TITLE[name]||[name,""]; title=t[0]; sub=t[1]; body=VIEWS[name]||""; }
   const vidx = VIEW_INDEX[name] ? `<span class="vidx">${VIEW_INDEX[name]}</span>` : "";
   document.getElementById("viewContainer").innerHTML =
@@ -1259,6 +1464,8 @@ function showView(name){
   else if(name==="visao") buildVisaoCharts();
   else if(name==="evolucao") buildEvolucaoCharts();
   else if(name==="editarconteudo") renderAllCE();
+  else if(name==="curso") afterCourseView();
+  else if(name==="editarcurso") renderCourseEditor();
   window.scrollTo({top:0});
 }
 
@@ -1296,7 +1503,7 @@ function mentorBanner(on, content){
   let bar=document.getElementById("mentorBar");
   if(!on){ if(bar) bar.remove(); return; }
   if(!bar){ bar=document.createElement("div"); bar.id="mentorBar"; document.body.prepend(bar); }
-  bar.innerHTML = '👁 Modo mentor — portal de <b>'+esc((content&&content.nome)||AS_CODE)+'</b>. As edições valem para esta produtora. <a href="#" onclick="showView(\'editarconteudo\');return false;">✏️ Editar conteúdo</a> <a href="painel.html">← Voltar ao painel</a>';
+  bar.innerHTML = '👁 Modo mentor — portal de <b>'+esc((content&&content.nome)||AS_CODE)+'</b>. As edições valem para esta produtora. <a href="#" onclick="showView(\'editarconteudo\');return false;">✏️ Editar conteúdo</a> <a href="#" onclick="showView(\'editarcurso\');return false;">🎬 Editar aulas</a> <a href="painel.html">← Voltar ao painel</a>';
 }
 function showApp(){ document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("appScreen").classList.remove("hidden"); loadAndRender(); }
 function showLogin(){ document.getElementById("appScreen").classList.add("hidden"); document.getElementById("loginScreen").classList.remove("hidden"); }
@@ -1358,7 +1565,39 @@ document.getElementById("chgConfirm").addEventListener("keydown",e=>{ if(e.key==
 document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
 document.getElementById("logoutBtn").addEventListener("click", doLogout);
 
-(async ()=>{ if(isMentorMode()){ showApp(); return; } const s=await validToken(); if(s) showApp(); else showLogin(); })();
+// Pré-preenche o e-mail vindo do Catalunya OS (?email=) e foca o campo da senha.
+function prefillEmailFromQuery(){
+  try{
+    const qp = new URLSearchParams(location.search).get("email");
+    const el = document.getElementById("email");
+    if(qp && el && !el.value){ el.value = qp; }
+    const em = el ? el.value : "";
+    setTimeout(()=>{ const f = document.getElementById(em ? "password" : "email"); if(f) f.focus(); }, 60);
+  }catch(e){}
+}
+// Login automático via link mágico do Catalunya OS (Supabase retorna #access_token no redirect).
+async function trySsoFromHash(){
+  try{
+    if(!location.hash || location.hash.indexOf("access_token") < 0) return false;
+    const h = new URLSearchParams(location.hash.replace(/^#/,""));
+    const at = h.get("access_token"), rt = h.get("refresh_token");
+    if(!at) return false;
+    const payload = JSON.parse(atob(at.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+    const am = payload.app_metadata || {};
+    if(!am.code) return false;
+    setSession({ access_token:at, refresh_token:rt, expires_at: Date.now() + ((parseInt(h.get("expires_in"),10)||3600)*1000), email: payload.email||"", code: am.code, content: am.content||null });
+    history.replaceState(null, "", location.pathname + location.search);
+    return true;
+  }catch(e){ return false; }
+}
+(async ()=>{
+  if(isMentorMode()){ showApp(); return; }
+  if(await trySsoFromHash()){ showApp(); return; }
+  const s = await validToken();
+  if(s){ showApp(); return; }
+  showLogin();
+  prefillEmailFromQuery();
+})();
 </script>
 </body>
 </html>
