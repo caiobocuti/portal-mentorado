@@ -125,7 +125,7 @@ textarea.ck-f{min-height:56px;resize:vertical;line-height:1.5}
       <div class="field"><label>Senha</label>
         <input type="password" id="password" placeholder="sua senha" autocomplete="current-password"></div>
       <button class="btn-main" id="loginBtn">Entrar →</button>
-      <div class="hint">Use o e-mail e a senha que você recebeu.<br><button type="button" class="link" id="toggleChange">Mudar minha senha</button></div>
+      <div class="hint">Use o e-mail e a senha que você recebeu.<br><button type="button" class="link" id="toggleForgot">Esqueci minha senha</button> · <button type="button" class="link" id="toggleChange">Mudar minha senha</button></div>
     </div>
     <div id="changePanel" class="hidden">
       <div class="brand">Mudar minha senha</div>
@@ -138,6 +138,15 @@ textarea.ck-f{min-height:56px;resize:vertical;line-height:1.5}
       <div class="field"><label>Confirmar nova senha</label><input type="password" id="chgConfirm" placeholder="repita a nova senha" autocomplete="new-password"></div>
       <button class="btn-main" id="chgBtn">Salvar nova senha</button>
       <div class="hint"><button type="button" class="link" id="toggleBackLogin">← Voltar ao login</button></div>
+    </div>
+    <div id="setPassPanel" class="hidden">
+      <div class="brand">Criar acesso</div>
+      <h1>Crie sua senha</h1>
+      <div class="sub" id="setPassWho">Defina uma senha para entrar nas aulas.</div>
+      <div id="setPassErr" class="login-err hidden"></div>
+      <div class="field"><label>Nova senha</label><input type="password" id="spNew" placeholder="mínimo 6 caracteres" autocomplete="new-password"></div>
+      <div class="field"><label>Confirmar senha</label><input type="password" id="spConfirm" placeholder="repita a senha" autocomplete="new-password"></div>
+      <button class="btn-main" id="spBtn">Salvar senha e entrar →</button>
     </div>
   </div>
 </div>
@@ -424,8 +433,68 @@ document.getElementById("chgBtn").addEventListener("click", async ()=>{
 });
 document.getElementById("chgConfirm").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("chgBtn").click(); });
 
+// ===== Convite / recuperação de senha (link que chega por e-mail) =====
+function parseAuthHash(){
+  if(!location.hash) return null;
+  const h=new URLSearchParams(location.hash.replace(/^#/,""));
+  if(!h.get("access_token") && !h.get("error")) return null;
+  return { at:h.get("access_token"), rt:h.get("refresh_token"), type:h.get("type")||"", exp:parseInt(h.get("expires_in"),10)||3600, err:h.get("error_description")||h.get("error")||"" };
+}
+function emailFromJwt(at){ try{ return (JSON.parse(atob(at.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))||{}).email||""; }catch(e){ return ""; } }
+let _invite=null;
+function showSetPassword(hp){
+  _invite={ at:hp.at, rt:hp.rt, exp:hp.exp, email:emailFromJwt(hp.at) };
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("appScreen").classList.add("hidden");
+  document.getElementById("loginPanel").classList.add("hidden");
+  document.getElementById("changePanel").classList.add("hidden");
+  document.getElementById("setPassPanel").classList.remove("hidden");
+  const who=document.getElementById("setPassWho");
+  if(who) who.textContent = _invite.email ? ("Olá! Crie uma senha para a conta "+_invite.email+".") : "Defina uma senha para entrar nas aulas.";
+  history.replaceState(null,"",location.pathname+location.search);
+  setTimeout(()=>{ const f=document.getElementById("spNew"); if(f) f.focus(); },60);
+}
+document.getElementById("spBtn").addEventListener("click", async ()=>{
+  const btn=document.getElementById("spBtn"), err=document.getElementById("setPassErr");
+  const nw=document.getElementById("spNew").value, cf=document.getElementById("spConfirm").value;
+  function e(t){ err.textContent=t; err.className="login-err"; }
+  err.className="login-err hidden";
+  if(!_invite||!_invite.at){ e("Link inválido ou expirado. Peça um novo convite ao seu mentor."); return; }
+  if(nw.length<6){ e("A senha precisa ter pelo menos 6 caracteres."); return; }
+  if(nw!==cf){ e("As senhas não batem."); return; }
+  btn.disabled=true; btn.textContent="Salvando...";
+  try{
+    const r=await fetch(SUPABASE_URL+"/auth/v1/user",{method:"PUT",headers:{apikey:SUPABASE_ANON_KEY,"Authorization":"Bearer "+_invite.at,"Content-Type":"application/json"},body:JSON.stringify({password:nw})});
+    const j=await r.json();
+    if(!r.ok){ throw new Error(j.msg||j.error_description||j.message||"Não foi possível salvar a senha."); }
+    setSession({ access_token:_invite.at, refresh_token:_invite.rt, expires_at: Date.now()+_invite.exp*1000, email:_invite.email||(j&&j.email)||"" });
+    applySession(getSession());
+    document.getElementById("setPassPanel").classList.add("hidden");
+    document.getElementById("loginPanel").classList.remove("hidden");
+    showApp();
+  }catch(ex){ e(ex.message||"Erro ao salvar a senha."); }
+  finally{ btn.disabled=false; btn.textContent="Salvar senha e entrar →"; }
+});
+document.getElementById("spConfirm").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("spBtn").click(); });
+
+// "Esqueci minha senha" → dispara e-mail de redefinição (requer SMTP configurado no Supabase)
+document.getElementById("toggleForgot").addEventListener("click", async ()=>{
+  const err=document.getElementById("loginErr");
+  const email=(document.getElementById("email").value||"").trim();
+  if(!email){ err.textContent="Digite seu e-mail no campo acima e clique de novo em 'Esqueci minha senha'."; err.className="login-err"; return; }
+  err.className="login-err hidden";
+  try{
+    const r=await fetch(SUPABASE_URL+"/auth/v1/recover",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:JSON.stringify({email})});
+    if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j.msg||j.error_description||"Não foi possível enviar o e-mail."); }
+    err.textContent="Enviamos um link de redefinição para "+email+". Confira sua caixa de entrada (e o spam)."; err.className="login-err ok";
+  }catch(ex){ err.textContent=ex.message||"Erro ao enviar o e-mail."; err.className="login-err"; }
+});
+
 // ===== init =====
 (async ()=>{
+  const hp = parseAuthHash();
+  if(hp && hp.err){ showLogin(); const e=document.getElementById("loginErr"); if(e){ e.textContent="O link expirou ou já foi usado. Peça um novo convite."; e.className="login-err"; } history.replaceState(null,"",location.pathname+location.search); return; }
+  if(hp && hp.at && (hp.type==="invite"||hp.type==="recovery"||hp.type==="signup")){ showSetPassword(hp); return; }
   if(await trySsoFromHash()){ showApp(); return; }
   const s = await validToken();
   if(s){ showApp(); return; }
